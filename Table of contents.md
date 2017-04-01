@@ -61,7 +61,7 @@ In order to understand this book, you should already know JavaScript. If you don
   * The es-discuss mailing list
   * es-discuss邮件列表
   * The TC39 meeting notes
-  * TC39回忆笔记
+  * TC39会议记录
   * Scientific papers
   * 研究者论文
   * Documentation on features in other languages that inspired ES6 features
