@@ -76,3 +76,26 @@ That func() returns undefined may be surprising. You can see why if you rewrite 
               return x;
             }
             func(false); // undefined
+
+
+In ES6, you can additionally declare variables via let and const. Such variables are block-scoped, their scopes are the innermost enclosing blocks. let is roughly a block-scoped version of var. const works like let, but creates variables whose values can’t be changed.
+
+在ES6添加let和const关键词声明变量 这样两个关键字声明变量是块级作用域 const声明不能改变其值
+
+let and const behave more strictly and throw more exceptions (e.g. when you access their variables inside their scope before they are declared). Block-scoping helps with keeping the effects of code fragments more local (see the next section for a demonstration). And it’s more mainstream than function-scoping, which eases moving between JavaScript and other programming languages.
+
+let const 表现更加严格并且抛出跟多意外 例如在声明之前访问 便于javascipt代码和主流代码移植
+
+If you replace var with let in the initial version, you get different behavior:
+
+如果用let替换var 会有不同表现
+
+        let x = 3;
+        function func(randomize) {
+            if (randomize) {
+                let x = Math.random();
+                return x;
+              }
+              return x;
+            }
+            func(false); // 3
