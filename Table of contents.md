@@ -73,19 +73,19 @@ In order to understand this book, you should already know JavaScript. If you don
 ### How to read this book
 This book covers ES6 with three levels of detail:
 
-  * Quick start: Begin with the chapter “Core ES6 features”. Additionally, almost every chapter starts with a section giving an overview of what’s in the chapter. The last chapter collects all of these overview sections in a single location.  
+  * **Quick start:** Begin with the chapter “Core ES6 features”. Additionally, almost every chapter starts with a section giving an overview of what’s in the chapter. The last chapter collects all of these overview sections in a single location.  
 
-  * 速学: 在ES6核心特色这章可以实现,同时几乎每一章的开始是本章的概述。
+  * **速学:** 在ES6核心特色这章可以实现,同时几乎每一章的开始是本章的概述。
 
-  * Solid foundation: Each chapter always starts with the essentials and then increasingly goes into details. The headings should give you a good idea of when to stop reading, but I also occasionally give tips in sidebars w.r.t. how important it is to know something.
+  * **Solid foundation:** Each chapter always starts with the essentials and then increasingly goes into details. The headings should give you a good idea of when to stop reading, but I also occasionally give tips in sidebars w.r.t. how important it is to know something.
 
-  * 基础知识: 每一章从本质开始渐渐渗透到细节。标题给出很好建议如果你不想读,但是我也出小提示在关于侧边栏,某一个细节的重要性
+  * **基础知识:** 每一章从本质开始渐渐渗透到细节。标题给出很好建议如果你不想读,但是我也出小提示在关于侧边栏,某一个细节的重要性
 
   * with regard to 的缩写，意思是“关于”.
 
-  * In-depth knowledge: Read all of a chapter, including the in-depth parts.
+  * **In-depth knowledge:** Read all of a chapter, including the in-depth parts.
 
-  * 知识深度
+  * **知识深度**
 
   Other things to know:
 
