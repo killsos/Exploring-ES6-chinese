@@ -126,25 +126,30 @@ ECMAScript 5 introduced language modes: Strict mode makes JavaScript a cleaner l
 ECMAScript 5介绍两种模式：严格模式是JavaScript代码变干净语言通过改变语法. 性能更多检查和抛出更多意外。默认模式是款冬模式
 
 Strict mode is switched on via the following line (which does nothing in ECMAScript versions before ES5):  
+
 选择严格模式通过下面的一行代码：   
 
           'use strict';
 
 
 If you put this line at the beginning of a file, all code in it is in strict mode. If you make this line the first line of a function, only that function is in strict mode.
+
 如果你把这行代码放到一个文件开始则整个文件是严格模式,如果放在一个函数开始则这个函数是严格模式.
 
 Using a directive to switch on strict mode is not very user friendly and was one of the reasons why strict mode was not nearly as popular in ES5 as it should be. However, ES6 modules and classes are implicitly in strict mode. Given that most ES6 code will live in modules, strict mode becomes the de-facto default for ES6.
+
 使用指令选择严格模式不是很用户友好的原因:这也是严格模式在ES5不受欢迎.
 
 模块和类默认是严格模式,绝大ES6代码运行在模块中,实际上严格模式是ES6默认模式.
 
 de facto 实际上
+
 de jure  法理上
 
 
 ### Protocol
 The term protocol has various meanings in computing. In the context of programming languages and API design, I’m using it as follows:
+
 协议这个词有不同意思.在编程语言和API设计的环境中,我的理解如下面:
 
 > A protocol defines interfaces (signatures for methods and/or functions) and rules for using them.
@@ -152,9 +157,11 @@ The term protocol has various meanings in computing. In the context of programmi
 > 协议定义了接口(方法和/或函数签名)和规则的使用它们。
 
 The idea is to specify how a service is to be performed. Then anyone can perform the service and anyone can request it and they are guaranteed to work together well.
+
 这个想法是为了介绍服务是如何被执行。任何人都可以执行服务,任何人都可以请求他们保证合作顺利。
 
 Note that the definition given here is different from viewing a protocol as an interface (as, for example, Objective C does), because this definition includes rules.
+
 注意,这里给出的定义不同于查看协议作为一个接口(例如,Objective - C),因为这个定义包括规则。
 
 ### Receiver (of a method call)
@@ -167,6 +174,7 @@ Given a method call obj.m(···), obj is the receiver of the method call and ac
 ### Signature of a function (or a method)
 
 The (type) signature of a function describes how the function is to be called, what its inputs and its output are. I’m using the syntax established by Microsoft TypeScript and Facebook Flow in this book. An example of a signature:  
+
 函数类型描述如何函数如何被调用 并且说明输入项和输出项 我用语法建立在微软的TypeScript和脸谱的Flow在这本书。下面列子是
 
         parseInt(string : string, radix? : number) : number  
@@ -174,4 +182,5 @@ The (type) signature of a function describes how the function is to be called, w
 
 
 You can see that parseInt() expects a string and a number and returns a number. If the type of a parameter is clear, I often omit the type annotation.
+
 我经常忘记这个注解
