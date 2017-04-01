@@ -145,9 +145,28 @@ de jure  法理上
 
 ### Protocol
 The term protocol has various meanings in computing. In the context of programming languages and API design, I’m using it as follows:
+协议这个词有不同意思.在编程语言和API设计的环境中,我的理解如下面:
 
 > A protocol defines interfaces (signatures for methods and/or functions) and rules for using them.
 
+> 协议定义了接口(方法和/或函数签名)和规则的使用它们。
+
 The idea is to specify how a service is to be performed. Then anyone can perform the service and anyone can request it and they are guaranteed to work together well.
+这个想法是为了介绍服务是如何被执行。任何人都可以执行服务,任何人都可以请求他们保证合作顺利。
 
 Note that the definition given here is different from viewing a protocol as an interface (as, for example, Objective C does), because this definition includes rules.
+注意,这里给出的定义不同于查看协议作为一个接口(例如,Objective - C),因为这个定义包括规则。
+
+### Receiver (of a method call)
+
+Given a method call obj.m(···), obj is the receiver of the method call and accessible via this inside the method.
+调用一个方法通过call obj.m(···),obj是调用方法接受者,并且访问内部方法
+
+
+### Signature of a function (or a method)
+
+The (type) signature of a function describes how the function is to be called, what its inputs and its output are. I’m using the syntax established by Microsoft TypeScript and Facebook Flow in this book. An example of a signature:
+
+        parseInt(string : string, radix? : number) : number
+
+You can see that parseInt() expects a string and a number and returns a number. If the type of a parameter is clear, I often omit the type annotation.
