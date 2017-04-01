@@ -1,4 +1,4 @@
-<img src="./cover.jpg" width="300"/>
+<img src="./cover.jpg" width="400" style="boder:solid 1px black"/>
 
 ## Exploring ES6 chinese
 
@@ -293,7 +293,7 @@ Several repositories on GitHub contain code shown in this book:
 Sidebars are boxes of text marked with icons. They complement the normal content.
 侧栏是标记文字和图表组成
 
-<img src="./sidebar.png" width="200" />
+<img src="./sidebar.png" width="300" style="boder:solid 1px black"/>
 
 ### Footnotes
 ### 脚注
