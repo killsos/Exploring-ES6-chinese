@@ -71,3 +71,16 @@ In order to understand this book, you should already know JavaScript. If you don
 
 
 ### How to read this book
+This book covers ES6 with three levels of detail:
+
+  * Quick start: Begin with the chapter “Core ES6 features”. Additionally, almost every chapter starts with a section giving an overview of what’s in the chapter. The last chapter collects all of these overview sections in a single location.  
+
+  * 123  
+
+  * Solid foundation: Each chapter always starts with the essentials and then increasingly goes into details. The headings should give you a good idea of when to stop reading, but I also occasionally give tips in sidebars w.r.t. how important it is to know something.
+
+  * 123
+
+  * In-depth knowledge: Read all of a chapter, including the in-depth parts.
+
+  * 123  
