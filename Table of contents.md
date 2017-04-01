@@ -9,15 +9,16 @@
 
 ### Table of Contents
 1. **[What you need to know about this book读书须知](#What-you-need-to-know-about-this-book)**
-  * **[Audience: JavaScript programmers](#Audience-JavaScript-programmers)**
-  * **[Why should I read th  book?](#Why-should-I-read-this-book)**
-  * **[How to read this book](#How-to-read-this-book)**
-  * **[Sources of this book](#Sources-of-this-book)**
-  * **[Glossary](#Glossary)**
-  * **[Conventions](#Conventions)**
-  * **[Demo code on GitHub](#Demo-code-on-GitHub)**
-  * **[Sidebars](#Sidebars)**
-  * **[Footnotes](#Footnotes)**
+
+   * **[Audience: JavaScript programmers](#Audience-JavaScript-programmers)**
+   * **[Why should I read th  book?](#Why-should-I-read-this-book)**
+   * **[How to read this book](#How-to-read-this-book)**
+   * **[Sources of this book](#Sources-of-this-book)**
+   * **[Glossary](#Glossary)**
+   * **[Conventions](#Conventions)**
+   * **[Demo code on GitHub](#Demo-code-on-GitHub)**
+   * **[Sidebars](#Sidebars)**
+   * **[Footnotes](#Footnotes)**
 
 2. **[Foreword 序](#Foreword)**
 3. **[Preface 前言](#Preface)**
