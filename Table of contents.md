@@ -13,7 +13,7 @@
 2. **[Foreword 序](#Foreword)**
 3. **[Preface 前言](#Preface)**
 4. **[Acknowledgements 致谢](#Acknowledgements)**
-5. **[About the author 关于作者](#About the author)**
+5. **[About the author 关于作者](#About-the-author)**
 
 
 
