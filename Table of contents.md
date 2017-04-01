@@ -159,14 +159,19 @@ Note that the definition given here is different from viewing a protocol as an i
 
 ### Receiver (of a method call)
 
-Given a method call obj.m(···), obj is the receiver of the method call and accessible via this inside the method.
+Given a method call obj.m(···), obj is the receiver of the method call and accessible via this inside the method.  
+
 调用一个方法通过call obj.m(···),obj是调用方法接受者,并且访问内部方法
 
 
 ### Signature of a function (or a method)
 
-The (type) signature of a function describes how the function is to be called, what its inputs and its output are. I’m using the syntax established by Microsoft TypeScript and Facebook Flow in this book. An example of a signature:
+The (type) signature of a function describes how the function is to be called, what its inputs and its output are. I’m using the syntax established by Microsoft TypeScript and Facebook Flow in this book. An example of a signature:  
+函数类型描述如何函数如何被调用 并且说明输入项和输出项 我用语法建立在微软的TypeScript和脸谱的Flow在这本书。下面列子是
 
-        parseInt(string : string, radix? : number) : number
+        parseInt(string : string, radix? : number) : number  
+        parseInt(字符串参数,可选参数是数字) 得到一个数字
+
 
 You can see that parseInt() expects a string and a number and returns a number. If the type of a parameter is clear, I often omit the type annotation.
+我经常忘记这个注解
