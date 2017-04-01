@@ -126,5 +126,6 @@ ECMAScript 5 introduced language modes: Strict mode makes JavaScript a cleaner l
 ECMAScript 5介绍两种模式：严格模式是JavaScript代码变干净语言通过改变语法. 性能更多检查和抛出更多意外。默认模式是款冬模式
 
 Strict mode is switched on via the following line (which does nothing in ECMAScript versions before ES5):  
-选择严格模式通过下面的一行代码：  
-    'use strict';
+选择严格模式通过下面的一行代码：   
+
+          'use strict';
