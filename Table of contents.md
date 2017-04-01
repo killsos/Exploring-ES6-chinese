@@ -275,4 +275,22 @@ In English, I capitalize JavaScript terms as follows:
    * 数组和Promise也大写 基本原理是为了不与英语单词混淆
 
 
-   * Not capitalized (for now): object, generator, proxy.
+### Demo code on GitHub
+
+Several repositories on GitHub contain code shown in this book:
+
+  * **[async-examples](https://github.com/rauschma/async-examples)**
+  * **[babel-on-node](https://github.com/rauschma/babel-on-node)**
+  * **[demo_promise](https://github.com/rauschma/demo_promise)**
+  * **[generator-examples](https://github.com/rauschma/generator-examples)**
+  * **[node-es6-demo](https://github.com/rauschma/node-es6-demo)**
+  * **[promise-examples](https://github.com/rauschma/promise-examples)**
+  * **[webpack-es6-demo](https://github.com/rauschma/webpack-es6-demo)**
+
+
+### Sidebars
+
+Sidebars are boxes of text marked with icons. They complement the normal content.
+侧栏是标记文字和图表组成
+
+！[Sidebars](./sidebar.png)
