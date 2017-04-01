@@ -293,4 +293,12 @@ Several repositories on GitHub contain code shown in this book:
 Sidebars are boxes of text marked with icons. They complement the normal content.
 侧栏是标记文字和图表组成
 
-![Sidebars](./sidebar.png)
+![Sidebars](./sidebar.png  =200)
+
+### Footnotes
+### 脚注
+
+Occasionally, I refer to (publicly available) external material via footnotes. Two sources are marked with a prefix in square brackets:
+
+[Spec] refers to content in the HTML version of the ES6 spec.
+[Speaking JS] refers to content in the HTML version of “Speaking JavaScript”.
