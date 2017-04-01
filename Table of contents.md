@@ -184,3 +184,27 @@ The (type) signature of a function describes how the function is to be called, w
 You can see that parseInt() expects a string and a number and returns a number. If the type of a parameter is clear, I often omit the type annotation.
 
 我经常忘记这个注解
+
+### Internal slots
+### 内部接口
+
+The ES6 language specification uses internal slots to store internal data. In the spec, internal slots are accessed as if they were properties whose names are in square brackets:
+
+在ES6中添加内部方法用来存储内部数据,在规定中,内部方法可以通过属性用方括号的方式来访问
+
+        O.[[GetPrototypeOf]]()
+
+
+Two things differentiate them from properties:
+
+  * They are not read via “get” operations and written via “set” operations.
+
+  不能set方式设定 不能通过set进行设定
+
+  * They are only known to the spec and not accessible from JavaScript. For example: the link between an object and its prototype is the internal slot [[Prototype]]. The value of that slot cannot be read directly via JavaScript, but you can use Object.getPrototypeOf() to do so.
+
+
+
+How exactly internal slots are stored is left unspecified. Some may not even exist in actual JavaScript implementations.
+
+很多内部方法并没有准确的说明,设置有一些在实际的javascipt并没有实现。
