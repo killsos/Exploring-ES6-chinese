@@ -24,14 +24,6 @@
 3. **[Preface 前言](#Preface)**
 4. **[Acknowledgements 致谢](#Acknowledgements)**
 5. **[About the author 关于作者](#About-the-author)**
-
-
-
-
-
-
-
-
 ---
 ### What you need to know about this book
 This book is about ECMAScript 6 (whose official name is ECMAScript 2015), a new version of JavaScript.  
@@ -293,7 +285,7 @@ Several repositories on GitHub contain code shown in this book:
 Sidebars are boxes of text marked with icons. They complement the normal content.
 侧栏是标记文字和图表组成
 
-<img src="./sidebar.png" width="300" style="boder:solid 1px black"/>
+<img src="./sidebar.png" width="400" style="boder:solid 1px black"/>
 
 ### Footnotes
 ### 脚注
@@ -302,3 +294,66 @@ Occasionally, I refer to (publicly available) external material via footnotes. T
 
 [Spec] refers to content in the HTML version of the ES6 spec.
 [Speaking JS] refers to content in the HTML version of “Speaking JavaScript”.
+
+
+### Foreword
+Edge cases! My life as the project editor of the ES6 specification has been all about edge cases. Like most software, the design of a programming language feature is typically driven by specific use cases. But programmers can and often do use language features in novel ways that are well outside the scope of those original use cases. In addition, no language feature stands alone. Every feature potentially interacts with every other feature. Those unexpected uses and feature interactions are the realm of edge cases.
+
+边界情况!我的生活随着项目的编辑ES6规范关于边界情况。像大多数软件,编程语言特性的设计通常是由特定的用例。但程序员可以用新颖的方式和经常使用的语言特性,这些原始用例的范围之外。此外,没有语言功能是孤立存在的。每个特性可能与其他特性。那些意想不到的用途和功能相互作用领域的边界情况
+
+For example, consider a function that has a parameter default value initialization expression that uses the eval function to first declare a local variable that has the same name as a local variable declared in the function body and then returns, as the parameter value, an arrow function that references that name. What happens if code in the function body accesses the parameter value and calls the arrow function? Which variable is accessed? Is there an error that should be detected and reported? It’s edge cases like this that kept me up at night while ES6 was being designed.
+
+例如,考虑一个函数有一个参数默认值初始化表达式,使用eval函数首先声明一个局部变量名称相同的函数体中声明一个局部变量,然后返回时,参数值,箭函数引用这个名字。如果函数体中的代码访问参数值并调用箭头功能?变量访问?有一个错误,应该发现和报告?这样的边界情况,让我夜不能寐,ES6被设计。
+
+A good language design must at least consider such edge cases. The specification of a massively popular language that will have multiple implementations must pin down what happens for all the edge cases. Otherwise, different implementation of the language will handle edge cases differently and programs won’t work the same everywhere.
+
+一个好的语言设计必须至少考虑边界情况。大规模流行的语言的规范,有多个实现必须确定所有的边界情况会发生什么。否则,不同的实现语言的处理边界情况以不同的方式和程序不工作同样无处不在。
+
+If you really want to understand ES6, you have to understand how each feature works, even when you’re dealing with unusual situations and edge cases. What sets Axel Rauschmayer’s Exploring ES6 apart from other books is that it really cares about the inner workings of ECMAScript. It doesn’t just describe the common use cases that you probably already understand. It digs deep into the semantics and, where necessary, wallows in the edge cases. It explains why features work the way that they work and how they are used in realistic code. Assimilate the material in this book and you will be an ES6 expert.
+
+如果你真的想了解ES6，你必须了解每个特征的作品，甚至当你处理异常情况和边缘情况。Axel Rauschmayer是探索ES6除了其他的书是真的很关心ECMAScript的内部运作。它不只是描述常见的用例，你可能已经了解。它深入挖掘语义，在必要时，在边缘情况下沉迷。它解释了为什么功能工作的方式，他们的工作，以及如何将它们用于实际代码。吸收材料在这本书中，你将是一个ES6专家。
+
+Allen Wirfs-Brock
+ECMAScript 2015 (ES6) Specification Editor
+
+### Preface
+
+You are reading a book about ECMAScript 6 (ES6), a new version of JavaScript. It’s great that we can finally use that version, which had a long and eventful past: It was first conceived as ECMAScript 4, a successor to ECMAScript 3 (whose release was in December 1999). In July 2008, plans changed and the next versions of JavaScript were to be first a small incremental release (which became ES5) and then a larger, more powerful release. The latter had the code name Harmony and part of it became ES6.
+
+
+你正在读一本关于ECMAScript 6(ES6),新版本的JavaScript。很高兴,我们终于可以使用这个版本,它经历了一个漫长而波折的过去,这是第一个被设想为ECMAScript 4,继任者ECMAScript 3(其发布是在1999年12月)。2008年7月,计划改变,未来版本的JavaScript被第一个小的增量版本(成为ES5)然后更大,更强大的版本。后者已经成为ES6代号和谐的一部分。
+
+ECMAScript 5 was standardized in December 2009. I first heard and blogged about ECMAScript 6 in January 2011, when it was still called Harmony. The original plan was to finish ES6 in 2013, but things took longer and it was standardized in June 2015. (A more detailed account of ES6’s history is given in the next chapter.)
+
+2009年12月ECMAScript 5是标准化。我第一次听到,博客ECMAScript 6 2011年1月,当它还叫和谐。原计划在2013年完成ES6,但事情的时间2015年6月,标准化。(更详细的帐户ES6历史的下一章中给出了)。
+
+With a few minor exceptions, I am happy how ECMAScript 6 turned out. This book describes my experiences with, and my research of, its features. Similarly to ES6, it took a long time to finish – in a way, I started writing it in early 2011. Like my previous book “Speaking JavaScript”, I wrote most of it as a series of blog posts. I like the discussion and feedback that this open process enables, which is why this book is available for free online.
+
+对于ES6有一些小期待，我很高兴ECMAScript 6出现。这本书介绍我的经验，和我的研究，其特点。与ES6类似，花了很长时间来完成，我开始写作，在2011年初。像我以前的书“Speaking JavaScript”，我写了大部分作为一系列的博客文章。我喜欢讨论和反馈，这个开放的过程使，这就是为什么这本书是免费提供在线
+
+This book can be read online for free. If you find it useful, please support it by buying a copy. You’ll get DRM-free PDF, EPUB, MOBI files.
+
+这本书可以在线免费阅读。如果你觉得它有用，请通过购买副本来支持它。你会得到的DRM免费的PDF，EPUB，MOBI文件。
+
+I hope that reading the book conveys some of the fun I had investigating and playing with ES6.
+
+我希望读这本书传达的一些有趣的调查和使用ES6.
+
+Axel Rauschmayer
+
+
+### Acknowledgements
+
+I owe thanks to the many people who have – directly or indirectly – contributed to this book; by answering questions, pointing out bugs in blog posts, etc.:
+
+Jake Archibald, André Bargull, Guy Bedford, James Burke, Mathias Bynens, Raymond Camden, Domenic Denicola, Brendan Eich, Eric Elliott, Michael Ficarra, Aaron Frost, Andrea Giammarchi, Jaydson Gomes, Jordan Harband, David Herman, James Kyle, Russell Leggett, Dmitri Lomov, Sebastian McKenzie, Calvin Metcalf, Mark S. Miller, Alan Norbauer, Mariusz Novak, Addy Osmani, Claude Pache, John K. Paul, Philip Roberts, Mike Samuel, Tom Schuster, Kyle Simpson (getify), Kevin Smith, Dmitry Soshnikov, Ingvar Stepanyan, Tom Van Cutsem, Šime Vidas, Rick Waldron, Allen Wirfs-Brock, Nicholas C. Zakas, Ondřej Žára, Juriy Zaytsev (kangax). And many more!
+
+Special thanks go to Benjamin Gruenbaum for his thorough review of the book.
+
+### About the author
+
+Dr. Axel Rauschmayer has been programming since 1985 and developing web applications since 1995. In 1999, he was technical manager at a German Internet startup that later expanded internationally. In 2006, he held his first talk on Ajax.
+
+1985就开始撸代码 1995开发软件 1999 就是技术经理 2006 他第一次举行关于Ajax的报告
+
+Axel specializes in JavaScript, as blogger, book author and trainer. He has done extensive research into programming language design and has followed the state of JavaScript since its creation. He started blogging about ECMAScript 6 in early 2011.
