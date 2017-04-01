@@ -246,3 +246,33 @@ The API of a class C is usually documented as follows:
 * C constructor
 * Static C methods
 * C.prototype methods
+
+### Capitalization
+### 大写
+
+In English, I capitalize JavaScript terms as follows:
+
+在英语中 我大写JavaScript的术语如下:
+
+   * The names of primitive entities are not capitalized: a boolean value, a number value, a symbol, a string. One reason why I’m doing this is because TypeScript and Flow distinguish:
+
+   * 原始体不大写 例如 布尔值 数字值 符号字符串 原因是TypeScript and Flow区别
+
+   * The type String: its members are objects, instances of String.
+
+   * The type string: its members are primitive values, strings.
+
+   * The data structure Map is capitalized. Rationale: distinguish from the Array method map().
+
+   * Map数据类型大写 基本原理是区分map方法
+
+   * The data structure Set is capitalized. Rationale: distinguish from the verb set.
+
+   * Set数据类型大写 基本原理是区分set方法
+
+   * Array and Promise are capitalized. Rationale: easy to confuse with English words.
+
+   * 数组和Promise也大写 基本原理是为了不与英语单词混淆
+
+
+   * Not capitalized (for now): object, generator, proxy.
