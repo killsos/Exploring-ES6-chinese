@@ -114,3 +114,9 @@ I started writing this book long before there were implementations of ES6 featur
   * [The old ECMAScript Harmony wiki](http://wiki.ecmascript.org/doku.php?id=harmony:harmony)
   * Scientific papers (e.g. the ones written about ES6 proxies) and other material on the web.
   * Asking around to fill remaining holes (the people who answered are acknowledged throughout the book)
+
+### Glossary
+### 词汇表
+
+**Strict mode versus sloppy mode**
+**严格模式与宽松模式**
