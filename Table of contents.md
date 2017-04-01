@@ -54,14 +54,20 @@ In order to understand this book, you should already know JavaScript. If you don
 * **不仅知道是什么 更想知道为什么** 告诉ES6如何做 更告诉为何这么做？
 
 * **Thoroughly researched:**  In order to make sense of ES6, I have consulted many sources:  
-* **彻底的研究**  为了搞清ES6，我总结下面六个条目
+* **彻底的研究**  为了搞清ES6，我参考下面六个来源
 
   * The language specification (to which you’ll occasionally find pointers in this book)  
+  * 语言规范 在本书你可以发现给出指引
   * The es-discuss mailing list
+  * es-discuss邮件列表
   * The TC39 meeting notes
+  * TC39回忆笔记
   * Scientific papers
+  * 研究者论文
   * Documentation on features in other languages that inspired ES6 features
+  * 其他语言文档上特色引起ES6特色
   * And more
+  * 更多
 
 
 ### How to read this book
