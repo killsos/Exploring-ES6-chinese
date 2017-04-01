@@ -59,3 +59,20 @@ In ES5, you declare variables via var. Such variables are function-scoped, their
           return x; // accesses the x from line A
         }
         func(false); // undefined
+
+
+That func() returns undefined may be surprising. You can see why if you rewrite the code so that it more closely reflects what is actually going on:
+
+函数func返回undefined让人感觉很奇怪 重写下面代码你就可以看到为什么了,让它更真实地反映出实际上是怎么回事。
+
+
+        var x = 3;
+        function func(randomize) {
+            var x;
+            if (randomize) {
+                x = Math.random();
+                return x;
+              }
+              return x;
+            }
+            func(false); // undefined
