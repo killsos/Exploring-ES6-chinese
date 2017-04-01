@@ -24,7 +24,7 @@
 
 ---
 
-### What you need to know about this book
+### **[What you need to know about this book][What-you-need-to-know-about-this-book]
 
   * **[Audience: JavaScript programmers](#Audience-JavaScript-programmers)**
   * **[Why should I read this book?](#Why-should-I-read-this-book)**
@@ -36,6 +36,10 @@
   * **[Sidebars](#Sidebars)**
   * **[Footnotes](#Footnotes)**
 
+
+### What you need to know about this book
+This book is about ECMAScript 6 (whose official name is ECMAScript 2015), a new version of JavaScript.
+本书主要介绍ECMAScript 6(官方称为ECMAScript 2015)是JavaScript的新版本
 ### Foreword
 ### Preface
 ### Acknowledgements
