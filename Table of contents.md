@@ -8,8 +8,12 @@
 ---
 
 ### Table of Contents
-1. **[What you need to know about this book](#What-you-need-to-know-about-this-book)**
+1. **[What you need to know about this book读书须知](#What-you-need-to-know-about-this-book)**
 
+2. **[Foreword 序](#Foreword)**
+3. **[Preface 前言](#Preface)**
+4. **[Acknowledgements 致谢](#Acknowledgements)**
+5. **[About the author 关于作者](#About the author)**
 
 
 
@@ -30,3 +34,8 @@
   * Demo code on GitHub
   * Sidebars
   * Footnotes
+
+### Foreword
+### Preface
+### Acknowledgements
+### About the author
