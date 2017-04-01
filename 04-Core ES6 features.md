@@ -1,8 +1,11 @@
 ### 4. Core ES6 features
+
 This chapter describes the core ES6 features. These features are easy to adopt; the remaining features are mainly of interest to library authors. I explain each feature via the corresponding ES5 code.
 
 这一章描述了核心ES6特性。这些特性很容易用到;剩下的功能主要是作者感兴趣的库。我将通过相应的ES5代码来解释每一个特色。
+
 ---
+
 * 4.1. From var to const/let
 * 4.2. From IIFEs to blocks
 * 4.3. From concatenating strings to template literals
