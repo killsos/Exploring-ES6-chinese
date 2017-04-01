@@ -129,3 +129,25 @@ Strict mode is switched on via the following line (which does nothing in ECMAScr
 选择严格模式通过下面的一行代码：   
 
           'use strict';
+
+
+If you put this line at the beginning of a file, all code in it is in strict mode. If you make this line the first line of a function, only that function is in strict mode.
+如果你把这行代码放到一个文件开始则整个文件是严格模式,如果放在一个函数开始则这个函数是严格模式.
+
+Using a directive to switch on strict mode is not very user friendly and was one of the reasons why strict mode was not nearly as popular in ES5 as it should be. However, ES6 modules and classes are implicitly in strict mode. Given that most ES6 code will live in modules, strict mode becomes the de-facto default for ES6.
+使用指令选择严格模式不是很用户友好的原因:这也是严格模式在ES5不受欢迎.
+
+模块和类默认是严格模式,绝大ES6代码运行在模块中,实际上严格模式是ES6默认模式.
+
+de facto 实际上
+de jure  法理上
+
+
+### Protocol
+The term protocol has various meanings in computing. In the context of programming languages and API design, I’m using it as follows:
+
+> A protocol defines interfaces (signatures for methods and/or functions) and rules for using them.
+
+The idea is to specify how a service is to be performed. Then anyone can perform the service and anyone can request it and they are guaranteed to work together well.
+
+Note that the definition given here is different from viewing a protocol as an interface (as, for example, Objective C does), because this definition includes rules.
