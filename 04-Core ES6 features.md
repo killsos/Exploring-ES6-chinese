@@ -1,4 +1,5 @@
 ### 4. Core ES6 features
+---
 
 This chapter describes the core ES6 features. These features are easy to adopt; the remaining features are mainly of interest to library authors. I explain each feature via the corresponding ES5 code.
 
