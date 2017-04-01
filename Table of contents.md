@@ -120,3 +120,11 @@ I started writing this book long before there were implementations of ES6 featur
 
 **Strict mode versus sloppy mode**
 **严格模式与宽松模式**
+
+ECMAScript 5 introduced language modes: Strict mode makes JavaScript a cleaner language by changing its semantics, performing more checks and throwing more exceptions. Consult Sect. [“Strict Mode”](http://speakingjs.com/es5/ch07.html#strict_mode) in “Speaking JavaScript” for more information. The legacy/default mode is called non-strict mode or sloppy mode.  
+
+ECMAScript 5介绍两种模式：严格模式是JavaScript代码变干净语言通过改变语法. 性能更多检查和抛出更多意外。默认模式是款冬模式
+
+Strict mode is switched on via the following line (which does nothing in ECMAScript versions before ES5):
+选择严格模式通过下面的一行代码：
+  'use strict';
