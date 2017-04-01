@@ -39,7 +39,7 @@ This book is about ECMAScript 6 (whose official name is ECMAScript 2015), a new 
 本书主要介绍ECMAScript 6(官方称为ECMAScript 2015)是JavaScript的新版本  
 
 ### Audience: JavaScript programmers
-In order to understand this book, you should already know JavaScript. If you don’t: my other book [“Speaking JavaScript”][http://speakingjs.com/] is free online and teaches programmers all of JavaScript (up to and including ECMAScript 5).  
+In order to understand this book, you should already know JavaScript. If you don’t: my other book [“Speaking JavaScript”](http://speakingjs.com/] is free online and teaches programmers all of JavaScript (up to and including ECMAScript 5).  
 
 为了更好学习本书，您最好是具有JavaScript基础。如果你还不具备JavaScript基础，可以先读我的《Speaking JavaScript》这本书--学习javascript基础知识并包含ECMAScript 5。  
 
