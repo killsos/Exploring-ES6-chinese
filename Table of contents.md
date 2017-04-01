@@ -102,8 +102,11 @@ This book covers ES6 with three levels of detail:
   * **勘误表** 在“Exploring ES6”首页给出勘误表的链接,您可以提交勘误。
 
 ### Sources of this book
+### 本书代码
 
-I started writing this book long before there were implementations of ES6 features, which required quite a bit of research. Essential sources were:
+I started writing this book long before there were implementations of ES6 features, which required quite a bit of research. Essential sources were:   
+
+我开始写这本书很久以前有ES6功能的实现,这需要相当多的研究。主要来源如下：
 
   * [The es-discuss mailing list](https://mail.mozilla.org/listinfo/es-discuss)
   * [TC39 meeting notes](https://github.com/tc39/tc39-notes/)
