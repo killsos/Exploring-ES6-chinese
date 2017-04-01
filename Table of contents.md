@@ -47,14 +47,21 @@ In order to understand this book, you should already know JavaScript. If you don
 
 * **You decide how deep to go:** This book covers ECMAScript 6 in depth, but is structured so that you can also quickly get an overview if you want to.  
 
+* **深度学习** 本书在深度上覆盖ECMAScript 6知识，你也可以大概的学习  
 
 * **Not just “what”, also “why”:** This book not only tells you how ES6 works, it also tells you why it works the way it does.  
 
-* **Thoroughly researched:**  In order to make sense of ES6, I have consulted many sources:  
+* **不仅知道是什么 更想知道为什么** 告诉ES6如何做 更告诉为何这么做？
 
-  * The language specification (to which you’ll occasionally find pointers in this book)
+* **Thoroughly researched:**  In order to make sense of ES6, I have consulted many sources:  
+* **彻底的研究**  为了搞清ES6，我总结下面六个条目
+
+  * The language specification (to which you’ll occasionally find pointers in this book)  
   * The es-discuss mailing list
   * The TC39 meeting notes
   * Scientific papers
   * Documentation on features in other languages that inspired ES6 features
   * And more
+
+
+### How to read this book
