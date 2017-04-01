@@ -88,5 +88,15 @@ This book covers ES6 with three levels of detail:
   * **知识深度**
 
   Other things to know:
+  其他需要知道的
 
   * **Recommendations:** I occasionally recommend simple rules. Those are meant as guidelines, to keep you safe without you having to know (or remember) all of the details. I tend to favor mainstream over elegance, because most code doesn’t exist in a vacuum. However, I’ll always give you enough information so that you can make up your own mind.
+  * **推荐:** 我偶尔介绍简单规则,这些基本指导为了使您能够正确使用如果没有深入了解和记住这些规则的细节。我倾向于喜欢主流的代码胜于优雅代码。实际上代码是用来完成工作而不是艺术品。但是 我总是给你充足的知识以便于你实现自己的想法。
+
+  * **Forum:** The “Exploring ES6” homepage [links to a forum](http://exploringjs.com/es6.html#forum) where you can discuss questions and ideas related to this book.  
+
+  * **论坛** 在“Exploring ES6”首页给出论坛链接,你可以讨论问题或者涉及到本书的想法
+
+  * **Errata (typos, errors, etc.):** [On the “Exploring ES6” homepage](http://exploringjs.com/es6.html#errata), there are links to a form for submitting errata and to a list with submitted errata.
+
+  * **勘误表** 在“Exploring ES6”首页给出勘误表的链接,您可以提交勘误。
