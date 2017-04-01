@@ -27,3 +27,13 @@ The next sections explain concepts that are important in the world of ES6.
 2015年6月17完成ES6 绝大部分特色已经可以使用（kangax’ ES6兼容列表） 通过babel将ES6代码转化为ES5
 
 下面讲解一些ES6重要概念
+
+### 1.1 TC39 (Ecma Technical Committee 39)
+
+
+TC39 (Ecma Technical Committee 39) is the committee that evolves JavaScript. Its members are companies (among others, all major browser vendors). TC39 meets regularly, its meetings are attended by delegates that members send and by invited experts. Minutes of the meetings are available online and give you a good idea of how TC39 works.
+
+
+TC39(Ecma技术委员会39)委员会,发展JavaScript。其成员企业(其中,所有主要的浏览器厂商)。TC39定期开会,会议出席代表成员发送和邀请的专家。分钟的网上会议,给你一个好主意TC39是如何工作的。
+
+### 1.2 How ECMAScript 6 was designed 
