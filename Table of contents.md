@@ -100,3 +100,14 @@ This book covers ES6 with three levels of detail:
   * **Errata (typos, errors, etc.):** [On the “Exploring ES6” homepage](http://exploringjs.com/es6.html#errata), there are links to a form for submitting errata and to a list with submitted errata.
 
   * **勘误表** 在“Exploring ES6”首页给出勘误表的链接,您可以提交勘误。
+
+### Sources of this book
+
+I started writing this book long before there were implementations of ES6 features, which required quite a bit of research. Essential sources were:
+
+  * [The es-discuss mailing list](https://mail.mozilla.org/listinfo/es-discuss)
+  * [TC39 meeting notes](https://github.com/tc39/tc39-notes/)
+  * [The ECMAScript language specification](http://www.ecma-international.org/ecma-262/6.0/)
+  * [The old ECMAScript Harmony wiki](http://wiki.ecmascript.org/doku.php?id=harmony:harmony)
+  * Scientific papers (e.g. the ones written about ES6 proxies) and other material on the web.
+  * Asking around to fill remaining holes (the people who answered are acknowledged throughout the book)
