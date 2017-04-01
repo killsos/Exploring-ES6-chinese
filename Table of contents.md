@@ -1,4 +1,4 @@
-![Exploring ES6 cover](./cover.jpg)
+<img src="./cover.jpg" width="300"/>
 
 ## Exploring ES6 chinese
 
@@ -293,7 +293,7 @@ Several repositories on GitHub contain code shown in this book:
 Sidebars are boxes of text marked with icons. They complement the normal content.
 侧栏是标记文字和图表组成
 
-![Sidebars](./sidebar.png  =200)
+<img src="./sidebar.png" width="200" />
 
 ### Footnotes
 ### 脚注
