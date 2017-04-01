@@ -207,4 +207,42 @@ Two things differentiate them from properties:
 
 How exactly internal slots are stored is left unspecified. Some may not even exist in actual JavaScript implementations.
 
-很多内部方法并没有准确的说明,设置有一些在实际的javascipt并没有实现。
+很多内部方法并没有准确的说明,甚至有一些在实际的javascipt中并没有实现。
+
+### Bindings and environments
+### 绑定和环境
+
+The ECMAScript spec uses a data structure called environment to store the variables of a scope. An environment is basically a dictionary that maps variable names to values. A binding is an entry in an environment, storage space for a variable.
+
+在ECMAScript规范中使用数据结构存储变量的作用域被称为执行环境,一个执行环境是一个变量名称与变量值映射的字典, 一个绑定就是对字典一个访问,一个存储空间对应一个变量
+
+### Destructive operations
+### 破坏性操作
+
+Destructive operations (methods, functions) modify their parameters or their receivers. For example, push() modifies its receiver arr:
+
+破坏性操作修改传入参数或接收者.
+
+        > const arr = ['a', 'b'];
+        > arr.push('c')
+        3
+        > arr
+        [ 'a', 'b', 'c' ]
+        In contrast, concat() creates a new Array and does not change its receiver arr:
+
+        > const arr = ['a', 'b'];
+        > arr.concat(['c'])
+        [ 'a', 'b', 'c' ]
+        > arr
+        [ 'a', 'b' ]
+
+
+### Conventions
+
+### Documenting classes
+
+The API of a class C is usually documented as follows:
+
+* C constructor
+* Static C methods
+* C.prototype methods
