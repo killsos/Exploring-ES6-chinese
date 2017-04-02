@@ -228,4 +228,51 @@ The examples differ in how much whitespace is included, but that doesn’t matte
 这个例子包含很多空格但是在情况下没关系
 
 ### 4.4 From function expressions to arrow functions
-   
+
+In current ES5 code, you have to be careful with this whenever you are using function expressions. In the following example, I create the helper variable _this (line A) so that the this of UiComponent can be accessed in line B.
+
+在ES5袋中 需要小心this当使用函数表达式 在下面这列中 需要创建_this变量来访问到UiComponent所代表this
+
+
+        function UiComponent() {
+            var _this = this; // (A)
+            var button = document.getElementById('myButton');
+            button.addEventListener('click', function () {
+                // 如果这里使用this 则指向button对象
+                console.log('CLICK');
+                _this.handleClick(); // (B)
+            });
+        }
+        UiComponent.prototype.handleClick = function () {
+            ···
+        };
+
+In ES6, you can use arrow functions, which don’t shadow this (line A):
+
+在ES6中 可以使用箭头函数---不影响this的指向
+
+        function UiComponent() {
+            var button = document.getElementById('myButton');
+            button.addEventListener('click', () => {
+                console.log('CLICK');
+                this.handleClick(); // (A)
+            });
+        }
+
+Arrow functions are especially handy for short callbacks that only return results of expressions
+
+箭头函数特别方便时短回调函数---只有返回一个值
+
+In ES5, such callbacks are relatively verbose:
+
+在ES5中 回调函数相对繁琐
+
+        var arr = [1, 2, 3];
+        var squares = arr.map(function (x) { return x * x });
+
+In ES6, arrow functions are much more concise:
+
+在ES6中 使用箭头函数就很简洁 不需要用return关键字
+
+        const arr = [1, 2, 3];
+        const squares = arr.map(x => x * x);
