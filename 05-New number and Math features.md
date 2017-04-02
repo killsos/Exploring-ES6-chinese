@@ -137,7 +137,79 @@ log10结果
 
 Math.hypot() Computes the square root of the sum of the squares of its arguments (Pythagoras’ theorem):
 
-Math.hypot() 勾股定理
+Math.hypot() 勾股定理  Pythagoras’ theorem 毕达哥拉斯定义 古希腊数学家
 
-          > Math.hypot(3, 4)
-          5    
+        > Math.hypot(3, 4)
+        5  
+
+
+### 5.2 New integer literals
+
+ECMAScript 5 already has literals for hexadecimal integers:
+
+        > 0x9
+        9
+        > 0xA
+        10
+        > 0x10
+        16
+        > 0xFF
+        255
+        ECMAScript 6 brings two new kinds of integer literals:
+
+Binary literals have the prefix 0b or 0B:
+
+          > 0b11
+          3
+          > 0b100
+          4
+
+Octal literals have the prefix 0o or 0O (that’s a zero followed by the capital letter O; the first variant is safer):
+
+          > 0o7
+          7
+          > 0o10
+          8
+
+Remember that the Number method toString(radix) can be used to see numbers in a base other than 10:
+
+        > 255..toString(16)
+        'ff'
+        > 4..toString(2)
+        '100'
+        > 8..toString(8)
+        '10'
+
+(The double dots are necessary so that the dot for property access isn’t confused with a decimal dot.)  
+
+number型通过toString可以转换二进制 八进制 十六进制的数字 但是调用toString方法前面加两个点
+
+### 5.2.1 Use case for octal literals: Unix-style file permissions
+### 八进制符合Unix-style文件权限
+
+In the Node.js file system module, several functions have the parameter mode. Its value is used to specify file permissions, via an encoding that is a holdover from Unix:
+
+在nodejs文件权限中，文件函数有权限参数，用来指定文件权限
+
+* Permissions are specified for three categories of users:
+
+  * User: the owner of the file  
+  * Group: the members of the group associated with the file  
+  * All: everyone  
+
+权限用来指定三个不同用户权限 用户 组 all
+
+* Per category, the following permissions can be granted:
+  * r (read): the users in the category are allowed to read the file 读
+  * w (write): the users in the category are allowed to change the file 写
+  * x (execute): the users in the category are allowed to run the file 执行
+
+That means that permissions can be represented by 9 bits (3 categories with 3 permissions each):
+
+用9位二进制表示
+
+| tabel    | 	User		    | Group     | Header Two     |
+| :------------- | :------------- | :------------- | :------------- |
+| Permissions       | r, w, x       | r, w, x      | r, w, x       |
+| :------------- | :------------- | :------------- | :------------- |
+| Bit       | 8, 7, 6       | 5, 4, 3       | 	2, 1, 0       |
