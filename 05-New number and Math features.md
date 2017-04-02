@@ -208,7 +208,21 @@ That means that permissions can be represented by 9 bits (3 categories with 3 pe
 
 用9位二进制表示
 
-| tabel    | 	User		    | Group     | Header Two     |
+|     | 	User		    | Group     | Header Two     |
 | :------------- | :------------- | :------------- | :------------- |
 | Permissions       | r, w, x       | r, w, x      | r, w, x       |
 | Bit       | 8, 7, 6       | 5, 4, 3       | 	2, 1, 0       |
+
+
+The permissions of a single category of users are stored in 3 bits:
+
+| Bits	 | Permissions | Octal digit     |
+| :------------- | :------------- | :------------- |
+| 000       | –––       | 1       |
+| 100     | ––x       | 2       |
+| 010       | –w–       | 3       |
+| 011       | –wx       | 4       |
+| 100       | r––	       | 5       |
+| 101       | r–x       | 6       |
+| 110      | rw–       | 7       |
+| 111       | rwx       | 8       |
