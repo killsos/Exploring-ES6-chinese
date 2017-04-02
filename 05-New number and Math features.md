@@ -226,3 +226,17 @@ The permissions of a single category of users are stored in 3 bits:
 | 101       | r–x       | 6       |
 | 110      | rw–       | 7       |
 | 111       | rwx       | 8       |
+
+
+That means that octal numbers are a compact representation of all permissions, you only need 3 digits, one digit per category of users. Two examples:
+
+755 = 111,101,101: I can change, read and execute; everyone else can only read and execute.
+640 = 110,100,000: I can read and write; group members can read; everyone can’t access at all.
+
+### 5.2.2 Number.parseInt() and the new integer literals
+
+Number.parseInt() (which does the same as the global function parseInt()) has the following signature:
+
+Number.parseInt()与window.parseInt()的区别
+
+Number.parseInt(string, radix?)
