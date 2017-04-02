@@ -48,11 +48,11 @@ Number增加新属性
 
 Number.EPSILON for comparing floating point numbers with a tolerance for rounding errors.
 
-**对于浮点数小数差的容错量---Number.EPSILON**
+Number.EPSILON---对于浮点数小数差的容错量
 
 Number.isInteger(num) checks whether num is an integer (a number without a decimal fraction):
 
-Number.isInteger(num) 判断一个数是否为整数
+Number.isInteger(num)---判断一个数是否为整数
 
           > Number.isInteger(1.05)
           false
@@ -66,7 +66,7 @@ Number.isInteger(num) 判断一个数是否为整数
 
 A method and constants for determining whether a JavaScript integer is safe (within the signed 53 bit range in which there is no loss of precision):
 
-        Number.isSafeInteger(number)
+        Number.isSafeInteger(number)---是否在合理整数范围 2**53次方
 
         Number.MIN_SAFE_INTEGER
 
@@ -74,13 +74,20 @@ A method and constants for determining whether a JavaScript integer is safe (wit
 
 Number.isNaN(num) checks whether num is the value NaN. In contrast to the global function isNaN(), it doesn’t coerce its argument to a number and is therefore safer for non-numbers:
 
-Number.isNaN(num)检查一个参数是否是NaN 首先会将参数强制转换为number型 相反是 window.isNaN()不会强制转换
+Number.isNaN(num)---检查一个参数是否是NaN 不会强制参数转换为number型 然后来判断结果是否NaN  
 
+相反是 window.isNaN()---首先会将参数强制转换为number型
+
+          var isNaN = function(value) {
+              return Number.isNaN(Number(value));
+          }
 
           > isNaN('???')
           true
-          
+
           > Number.isNaN('???')
           false
 
 Three additional methods of Number are mostly equivalent to the global functions with the same names: Number.isFinite, Number.parseFloat, Number.parseInt.
+
+现在Number这个对象新添加Number.isFinite, Number.parseFloat, Number.parseInt 等三个全局方法
