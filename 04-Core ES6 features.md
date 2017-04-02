@@ -719,3 +719,241 @@ In ES6, all built-in constructors can be subclassed, which is why the following 
 
         class MyError extends Error {
         }
+
+
+### 4.15 From objects to Maps
+### 从对象到映射
+
+The Map object is a simple key/value map. Any value (both objects and primitive values) may be used as either a key or a value.
+
+Using the language construct object as a map from strings to arbitrary values (a data structure) has always been a makeshift solution in JavaScript. The safest way to do so is by creating an object whose prototype is null. Then you still have to ensure that no key is ever the string '__proto__', because that property key triggers special functionality in many JavaScript engines.
+
+The following ES5 code contains the function countWords that uses the object dict as a map:
+
+        var dict = Object.create(null);
+        function countWords(word) {
+            var escapedWord = escapeKey(word);
+            if (escapedWord in dict) {
+                dict[escapedWord]++;
+            } else {
+                dict[escapedWord] = 1;
+            }
+        }
+        function escapeKey(key) {
+            if (key.indexOf('__proto__') === 0) {
+                return key+'%';
+            } else {
+                return key;
+            }
+        }
+
+In ES6, you can use the built-in data structure Map and don’t have to escape keys. As a downside, incrementing values inside Maps is less convenient.
+
+        const map = new Map();
+        function countWords(word) {
+            const count = map.get(word) || 0;
+            map.set(word, count + 1);
+        }
+
+Another benefit of Maps is that you can use arbitrary values as keys, not just strings.
+
+### 4.16 New string methods
+
+The ECMAScript 6 standard library provides several new methods for strings.
+
+**From indexOf to startsWith:**
+
+        if (str.indexOf('x') === 0) {} // ES5
+        if (str.startsWith('x')) {} // ES6
+
+**From indexOf to endsWith:**
+
+        function endsWith(str, suffix) { // ES5
+          var index = str.indexOf(suffix);
+          return index >= 0
+            && index === str.length-suffix.length;
+        }
+        str.endsWith(suffix); // ES6
+
+**From indexOf to includes:**
+
+        if (str.indexOf('x') >= 0) {} // ES5
+        if (str.includes('x')) {} // ES6
+
+**From join to repeat**
+
+(the ES5 way of repeating a string is more of a hack):
+
+        new Array(3+1).join('#') // ES5
+        '#'.repeat(3) // ES6
+
+
+### 4.17 New Array methods
+
+There are also several new Array methods in ES6.
+
+### 4.17.1 From Array.prototype.indexOf to Array.prototype.findIndex
+
+The latter can be used to find NaN, which the former can’t detect:
+
+**indexOf到findIndex(value)**
+
+        const arr = ['a', NaN];
+
+        arr.indexOf(NaN); // -1
+        arr.findIndex(x => Number.isNaN(x)); // 1
+
+Number.isNaN可以准确判断NaN
+
+window.isNaN和Number.isNaN的区别
+
+As an aside, the new Number.isNaN() provides a safe way to detect NaN (because it doesn’t coerce non-numbers to numbers):
+
+As an aside 顺便插一句
+
+coerce vt. 迫使做;强迫, 强制 (以武力、惩罚、威胁等手段)控制;支配;压制
+
+        > isNaN('abc')
+        true
+        > Number.isNaN('abc')
+        false
+
+### 4.17.2 From Array.prototype.slice() to Array.from() or the spread operator
+
+**from方法通过扩展操作符 与slice**
+
+In ES5, Array.prototype.slice() was used to convert Array-like objects to Arrays. In ES6, you have Array.from():
+
+        var arr1 = Array.prototype.slice.call(arguments); // ES5
+        const arr2 = Array.from(arguments); // ES6
+
+If a value is iterable (as all Array-like DOM data structure are by now), you can also use the spread operator (...) to convert it to an Array:
+
+
+        const arr1 = [...'abc'];
+            // ['a', 'b', 'c']
+
+        const arr2 = [...new Set().add('a').add('b')];
+            // ['a', 'b']
+
+### 4.17.3 From apply() to Array.prototype.fill()
+
+In ES5, you can use apply(), as a hack, to create in Array of arbitrary length that is filled with undefined:
+
+        // Same as Array(undefined, undefined)
+        var arr1 = Array.apply(null, new Array(2));
+            // [undefined, undefined]
+
+In ES6, fill() is a simpler alternative:
+
+        const arr2 = new Array(2).fill(undefined);
+            // [undefined, undefined]
+
+fill() is even more convenient if you want to create an Array that is filled with an arbitrary value:
+
+        // ES5
+        var arr3 = Array.apply(null, new Array(2))
+            .map(function (x) { return 'x' });
+            // ['x', 'x']
+
+        // ES6
+        const arr4 = new Array(2).fill('x');
+            // ['x', 'x']
+
+fill() replaces all Array elements with the given value. Holes are treated as if they were elements.
+
+### 4.18 From CommonJS modules to ES6 modules
+### CommonJS模块化到ES6模块化
+
+Even in ES5, module systems based on either AMD syntax or CommonJS syntax have mostly replaced hand-written solutions such as the revealing module pattern.
+
+reveal vt. 显示; 露出 泄露; 透露
+reveling 显式
+
+ES6 has built-in support for modules. Alas, no JavaScript engine supports them natively, yet. But tools such as browserify, webpack or jspm let you use ES6 syntax to create modules, making the code you write future-proof.
+
+ES6自建模块化现在还没有浏览器支持但是可以browserify, webpack的工具转换
+
+### 4.18.1 Multiple exports
+
+### 4.18.1.1 Multiple exports in CommonJS
+
+In CommonJS, you export multiple entities as follows:
+
+        //------ lib.js ------
+        var sqrt = Math.sqrt;
+        function square(x) {
+            return x * x;
+        }
+        function diag(x, y) {
+            return sqrt(square(x) + square(y));
+        }
+        module.exports = {
+            sqrt: sqrt,
+            square: square,
+            diag: diag,
+        };
+
+        //------ main1.js ------
+        var square = require('lib').square;
+        var diag = require('lib').diag;
+
+        console.log(square(11)); // 121
+        console.log(diag(4, 3)); // 5
+
+Alternatively, you can import the whole module as an object and access square and diag via it:
+
+    //------ main2.js ------
+    var lib = require('lib');
+    console.log(lib.square(11)); // 121
+    console.log(lib.diag(4, 3)); // 5
+
+### 4.18.1.2 Multiple exports in ES6
+
+In ES6, multiple exports are called named exports and handled like this:
+
+          //------ lib.js ------
+          export const sqrt = Math.sqrt;
+          export function square(x) {
+              return x * x;
+          }
+          export function diag(x, y) {
+              return sqrt(square(x) + square(y));
+          }
+
+          //------ main1.js ------
+          import { square, diag } from 'lib';
+          console.log(square(11)); // 121
+          console.log(diag(4, 3)); // 5
+          The syntax for importing modules as objects looks as follows (line A):
+
+          //------ main2.js ------
+          import * as lib from 'lib'; // (A)
+          console.log(lib.square(11)); // 121
+          console.log(lib.diag(4, 3)); // 5
+
+
+### 4.18.2 Single exports
+
+### 4.18.2.1 Single exports in CommonJS
+
+Node.js extends CommonJS and lets you export single values from modules, via module.exports:
+
+          //------ myFunc.js ------
+          module.exports = function () { ··· };
+
+          //------ main1.js ------
+          var myFunc = require('myFunc');
+          myFunc();
+
+
+### 4.18.2.2 Single exports in ES6
+
+In ES6, the same thing is done via a so-called default export (declared via export default):
+
+          //------ myFunc.js ------
+          export default function () { ··· } // no semicolon!
+
+          //------ main1.js ------
+          import myFunc from 'myFunc';
+          myFunc();
