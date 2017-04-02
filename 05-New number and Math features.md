@@ -211,5 +211,4 @@ That means that permissions can be represented by 9 bits (3 categories with 3 pe
 | tabel    | 	User		    | Group     | Header Two     |
 | :------------- | :------------- | :------------- | :------------- |
 | Permissions       | r, w, x       | r, w, x      | r, w, x       |
-| :------------- | :------------- | :------------- | :------------- |
 | Bit       | 8, 7, 6       | 5, 4, 3       | 	2, 1, 0       |
