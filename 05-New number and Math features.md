@@ -82,6 +82,8 @@ Number.isNaN(num)---检查一个参数是否是NaN 不会强制参数转换为nu
               return Number.isNaN(Number(value));
           }
 
+          // 这样理解window.isNaN()的工作过程
+
           > isNaN('???')
           true
 
@@ -90,4 +92,52 @@ Number.isNaN(num)---检查一个参数是否是NaN 不会强制参数转换为nu
 
 Three additional methods of Number are mostly equivalent to the global functions with the same names: Number.isFinite, Number.parseFloat, Number.parseInt.
 
-现在Number这个对象新添加Number.isFinite, Number.parseFloat, Number.parseInt 等三个全局方法
+现在Number这个对象新添加  
+Number.isFinite  
+Number.parseFloat  
+Number.parseInt  
+等三个全局方法
+
+### 5.1.3 New Math methods
+
+The global object Math has new methods for numerical, trigonometric and bitwise operations. Let’s look at four examples.
+
+Math.sign() returns the sign of a number:
+
+Math.sign() 判断正负数 1 正 0--0 -1 负
+
+        > Math.sign(-8)
+        -1
+        > Math.sign(0)
+        0
+        > Math.sign(3)
+        1
+
+Math.trunc() removes the decimal fraction of a number:
+
+Math.trunc() turncate 去掉小数位 并且不四舍五入
+
+        > Math.trunc(3.1)
+        3
+        > Math.trunc(3.9)
+        3
+        > Math.trunc(-3.1)
+        -3
+        > Math.trunc(-3.9)
+        -3
+
+
+Math.log10() computes the logarithm to base 10:
+
+log10结果
+
+        > Math.log10(100)
+        2
+
+
+Math.hypot() Computes the square root of the sum of the squares of its arguments (Pythagoras’ theorem):
+
+Math.hypot() 勾股定理
+
+          > Math.hypot(3, 4)
+          5    
