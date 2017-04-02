@@ -212,15 +212,20 @@ ES6 template literals can span multiple lines:
 
 ES6 模板字面量方式就可以跨多行 无需添加换行符
 
-          const HTML5_SKELETON = \`
-              <!doctype html>
-              <html>
-              <head>
-                  <meta charset="UTF-8">
-                  <title></title>
-              </head>
-              <body>
-              </body>
-              </html>\`;
+        const HTML5_SKELETON = `
+        <!doctype html>
+        <html>
+        <head>
+        <meta charset="UTF-8">
+        <title></title>
+        </head>
+        <body>
+        </body>
+        </html>`;
 
 The examples differ in how much whitespace is included, but that doesn’t matter in this case.
+
+这个例子包含很多空格但是在情况下没关系
+
+### 4.4 From function expressions to arrow functions
+   
