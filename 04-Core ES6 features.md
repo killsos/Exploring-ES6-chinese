@@ -97,5 +97,73 @@ If you replace var with let in the initial version, you get different behavior:
                 return x;
               }
               return x;
-            }
-            func(false); // 3
+        }
+        func(false); // 3
+
+
+That means that you can’t blindly replace var with let or const in existing code; you have to be careful during refactoring.
+
+不要简单用let替换var在已经有代码中
+
+My advice is:
+
+建议如下
+
+Prefer const. You can use it for all variables whose values never change.
+
+喜欢const创建一个常量
+
+Otherwise, use let – for variables whose values do change.
+
+否则用let创建一个变量
+
+Avoid var.
+
+避免使用var声明
+
+
+### 4.2 From IIFEs to blocks
+
+In ES5, you had to use a pattern called IIFE (Immediately-Invoked Function Expression) if you wanted to restrict the scope of a variable tmp to a block:
+
+在ES5中想限制一个变量作用域在一个块中就不得不使用IIFE 自执行函数表达式
+
+        (function () {  // open IIFE
+            var tmp = ···;
+            ···
+        }());  // close IIFE
+
+        console.log(tmp); // ReferenceError
+
+In ECMAScript 6, you can simply use a block and a let declaration (or a const declaration):
+
+在ES6中就使用块级作用域就很简单,使用let就可以了
+
+      {  // open block
+          let tmp = ···;
+          ···
+      }  // close block
+
+More information: section [“Avoid IIFEs in ES6”](http://exploringjs.com/es6/ch_callables.html#sec_iifes-in-es6).
+
+### 4.3 From concatenating strings to template literals
+
+With ES6, JavaScript finally gets literals for string interpolation and multi-line strings.
+
+在ES6中JavaScript实现字符串插值和多行字符串字面值
+
+### 4.3.1 String interpolation
+
+In ES5, you put values into strings by concatenating those values and string fragments:
+
+在ES5中,将一个变量值放入到字符串需要通过链接方式和字符串片段
+
+        function printCoord(x, y) {
+            console.log('('+x+', '+y+')');
+        }
+        
+In ES6 you can use string interpolation via template literals:
+
+function printCoord(x, y) {
+    console.log(`(${x}, ${y})`);
+}
