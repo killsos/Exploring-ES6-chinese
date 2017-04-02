@@ -249,7 +249,8 @@ In current ES5 code, you have to be careful with this whenever you are using fun
 
 In ES6, you can use arrow functions, which don’t shadow this (line A):
 
-在ES6中 可以使用箭头函数---不影响this的指向
+在ES6中 可以使用箭头函数---不影响this的指向 原因 箭头函数中this指向取决于声明时候位置this的指向
+而普通函数表达式取决于执行时候this的指向
 
         function UiComponent() {
             var button = document.getElementById('myButton');
@@ -276,3 +277,255 @@ In ES6, arrow functions are much more concise:
 
         const arr = [1, 2, 3];
         const squares = arr.map(x => x * x);
+
+When defining parameters, you can even omit parentheses if the parameters are just a single identifier. Thus: (x) => x * x and x => x * x are both allowed.
+
+当定义参数 可以省略圆括号如果只有一个参数的时候
+
+### 4.5 Handling multiple return values
+### 处理多个返回值
+
+Some functions or methods return multiple values via arrays or objects. In ES5, you always need to create intermediate variables if you want to access those values. In ES6, you can avoid intermediate variables via destructuring.
+
+ES5中在函数或方法返回多个值通过数组或者对象, 因此需要创建一个中间变量来完成. 而在ES6中 就可以避免中间变量通过解构
+
+
+### 4.5.1 Multiple return values via arrays
+
+exec() returns captured groups via an Array-like object. In ES5, you need an intermediate variable (matchObj in the example below), even if you are only interested in the groups:
+
+        var matchObj =
+            /^(\d\d\d\d)-(\d\d)-(\d\d)$/
+            .exec('2999-12-31');
+        var year = matchObj[1];
+        var month = matchObj[2];
+        var day = matchObj[3];
+
+In ES6, destructuring makes this code simpler:
+
+        const [, year, month, day] =
+            /^(\d\d\d\d)-(\d\d)-(\d\d)$/
+            .exec('2999-12-31');
+
+The empty slot at the beginning of the Array pattern skips the Array element at index zero.
+
+在数组中忽略索引0的值
+
+
+### 4.5.2 Multiple return values via objects
+
+The method Object.getOwnPropertyDescriptor() returns a property descriptor, an object that holds multiple values in its properties.
+
+Object.getOwnPropertyDescriptor()这个方法返回一个属性描述的对象,这个对象拥有多个属性的描述值
+
+In ES5, even if you are only interested in the properties of an object, you still need an intermediate variable (propDesc in the example below):
+
+
+var obj = { foo: 123 };
+
+var propDesc = Object.getOwnPropertyDescriptor(obj, 'foo');
+var writable = propDesc.writable;
+var configurable = propDesc.configurable;
+
+console.log(writable, configurable); // true true
+In ES6, you can use destructuring:
+
+const obj = { foo: 123 };
+
+const {writable, configurable} =
+    Object.getOwnPropertyDescriptor(obj, 'foo');
+
+console.log(writable, configurable); // true true
+
+{writable, configurable} is an abbreviation(缩写) for:
+
+{ writable: writable, configurable: configurable }
+
+总结:数组解构按位置 对象解构按属性名
+
+### 4.6 From for to forEach() to for-of
+
+Prior to ES5, you iterated over Arrays as follows:
+
+ES5之前 只能使用for循环
+
+iterate vt. 迭代；重复；反复说；重做
+iterator n. 迭代器；迭代程序
+iterative adj. [数] 迭代的；重复的，反复的 n. 反复体
+iteratively adv. 迭代地；反复地
+
+        var arr = ['a', 'b', 'c'];
+        for (var i=0; i<arr.length; i++) {
+            var elem = arr[i];
+            console.log(elem);
+        }
+
+In ES5, you have the option of using the Array method forEach():
+
+在ES5 有新迭方式forEach
+
+arr.forEach(function (elem) {
+    console.log(elem);
+});
+A for loop has the advantage that you can break from it, forEach() has the advantage of conciseness.
+
+for迭代可以通过break来停止迭代 forEach有点是简洁
+
+arr.forEach(function callback(currentValue, index, array) {
+    //your iterator
+}[, thisArg]);
+
+forEach 不能使用continue, break;  可以使用如下两种方式：
+1. if 语句控制
+2. return . (return true, false)
+return --> 类似continue
+
+        arryAll.forEach(function(e){  
+            if(e%2==0)  
+            {  
+                arrySpecial.push(e);  
+                return;  
+            }  
+            if(e%3==0)  
+            {      
+                arrySpecial.push(e);  
+                return;  
+            }  
+        })
+
+In ES6, the for-of loop combines both advantages:
+
+在ES6的for-of循环集合这两个优点 for-of可以对字符串 数组 类数组 Map Set 进行迭代
+
+for-of是通过Symbol.iterator这个方法来完成迭代 所以对象只要Symbol.iterator的方法就可以使用for-of来迭代
+
+
+for in遍历的是数组的索引（即键名），而for of遍历的是数组元素值
+for of遍历的只是数组内的元素，而不包括数组的原型属性method和索引name
+遍历对象 通常用for in来遍历对象的键名
+for in 可以遍历到myObject的原型方法method,如果不想遍历原型方法和属性的话，可以在循环内部判断一下,hasOwnPropery方法可以判断某属性是否是该对象的实例属性
+同样可以通过ES5的Object.keys(myObject)获取对象的实例属性组成的数组，不包括原型方法和属性
+
+        const arr = ['a', 'b', 'c'];
+        for (const elem of arr) {
+            console.log(elem);
+            // a
+            // b
+            // c
+        }
+
+
+If you want both index and value of each array element, for-of has got you covered, too, via the new Array method entries() and destructuring:
+
+for-of迭代是value 如果迭代index和value需要通过数组entries()同时解构
+
+for (const [index, elem] of arr.entries()) {
+    console.log(index+'. '+elem);
+}
+
+
+### 4.7 Handling parameter default values
+### 参数的默认值
+
+In ES5, you specify default values for parameters like this:
+
+        function foo(x, y) {
+            x = x || 0;
+            y = y || 0;
+            ···
+        }
+ES6 has nicer syntax:
+
+        function foo(x=0, y=0) {
+            ···
+        }
+
+An added benefit is that in ES6, a parameter default value is only triggered by undefined, while it is triggered by any false value in the previous ES5 code.
+
+在ES5之前代码中 默认值被触发通过任何一个false value
+
+
+### 4.8 Handling named parameters
+### 处理有名的参数
+
+A common way of naming parameters in JavaScript is via object literals (the so-called options object pattern):
+
+有名的参数共同方法是通过对象
+
+        selectEntries({ start: 0, end: -1 });
+
+Two advantages of this approach are: Code becomes more self-descriptive and it is easier to omit arbitrary parameters.
+
+
+In ES5, you can implement selectEntries() as follows:
+
+        function selectEntries(options) {
+            var start = options.start || 0;
+            var end = options.end || -1;
+            var step = options.step || 1;
+            ···
+        }
+In ES6, you can use destructuring in parameter definitions and the code becomes simpler:
+
+        function selectEntries({ start=0, end=-1, step=1 }) {
+            ···
+        }
+
+### 4.8.1 Making the parameter optional
+### 指定可选参数
+
+To make the parameter options optional in ES5, you’d add line A to the code:
+
+
+        function selectEntries(options) {
+            options = options || {}; // (A)
+            var start = options.start || 0;
+            var end = options.end || -1;
+            var step = options.step || 1;
+            ···
+        }
+
+In ES6 you can specify {} as a parameter default value:
+
+        function selectEntries({ start=0, end=-1, step=1 } = {}) {
+            ···
+        }
+
+### 4.9 From arguments to rest parameters
+### 从arguments到剩余参数
+
+In ES5, if you want a function (or method) to accept an arbitrary number of arguments, you must use the special variable arguments:
+
+        function logAllArguments() {
+            for (var i=0; i < arguments.length; i++) {
+                console.log(arguments[i]);
+            }
+        }
+
+In ES6, you can declare a rest parameter (args in the example below) via the ... operator:
+
+        function logAllArguments(...args) {
+            for (const arg of args) {
+                console.log(arg);
+            }
+        }
+
+Rest parameters are even nicer if you are only interested in trailing parameters:  
+
+trailing adj. 后面的；拖尾的；牵引的；被拖动的；蔓延的  
+n. 拖尾；泥浆彩饰  
+v. 尾随（trail的ing形式）  
+
+        function format(pattern, ...args) {
+            ···
+        }
+
+Handling this case in ES5 is clumsy:  
+clumsy  adj. 笨拙的
+
+        function format(pattern) {
+            var args = [].slice.call(arguments, 1);
+            ···
+        }
+
+Rest parameters make code easier to read: You can tell that a function has a variable number of parameters just by looking at its parameter definitions.
