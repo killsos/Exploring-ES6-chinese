@@ -529,3 +529,193 @@ clumsy  adj. 笨拙的
         }
 
 Rest parameters make code easier to read: You can tell that a function has a variable number of parameters just by looking at its parameter definitions.
+
+### 4.10 From apply() to the spread operator (...)
+### 扩展操作符
+
+In ES5, you turn arrays into parameters via apply(). ES6 has the spread operator for this purpose.
+
+在ES5中将一个数组给一个函数作为参数需要apply 在ES6中可以扩展操作符就可以
+
+### 4.10.1 Math.max()
+
+Math.max() returns the numerically greatest of its arguments. It works for an arbitrary number of arguments, but not for Arrays.
+
+ES5 – apply():
+
+          > Math.max.apply(Math, [-1, 5, 11, 3])
+          11
+
+ES6 – spread operator:
+
+        > Math.max(...[-1, 5, 11, 3])
+        11
+
+### 4.10.2 Array.prototype.push()
+
+Array.prototype.push() appends all of its arguments as elements to its receiver. There is no method that destructively appends an Array to another one.
+
+ES5 – apply():
+
+        var arr1 = ['a', 'b'];
+        var arr2 = ['c', 'd'];
+
+        arr1.push.apply(arr1, arr2);
+            // arr1 is now ['a', 'b', 'c', 'd']
+
+ES6 – spread operator:
+
+        const arr1 = ['a', 'b'];
+        const arr2 = ['c', 'd'];
+
+        arr1.push(...arr2);
+            // arr1 is now ['a', 'b', 'c', 'd']
+
+### 4.11 From concat() to the spread operator (...)
+### 从concat到扩展符
+
+The spread operator can also (non-destructively) turn the contents of its operand into Array elements. That means that it becomes an alternative to the Array method concat().
+
+ES5 – concat():
+
+            var arr1 = ['a', 'b'];
+            var arr2 = ['c'];
+            var arr3 = ['d', 'e'];
+
+            console.log(arr1.concat(arr2, arr3));
+                // [ 'a', 'b', 'c', 'd', 'e' ]
+
+ES6 – spread operator:
+
+            const arr1 = ['a', 'b'];
+            const arr2 = ['c'];
+            const arr3 = ['d', 'e'];
+
+            console.log([...arr1, ...arr2, ...arr3]);
+                // [ 'a', 'b', 'c', 'd', 'e' ]
+
+### 4.12 From function expressions in object literals to method definitions
+### 在对象中通过函数表达式定义方法
+
+In JavaScript, methods are properties whose values are functions.
+
+In ES5 object literals, methods are created like other properties. The property values are provided via function expressions.
+
+                var obj = {
+                    foo: function () {
+                        ···
+                    },
+                    bar: function () {
+                        this.foo();
+                    }, // trailing comma is legal in ES5
+                }
+
+ES6 has method definitions, special syntax for creating methods:
+
+                const obj = {
+                    foo() {
+                        ···
+                    },
+                    bar() {
+                        this.foo();
+                    },
+                }
+
+### 4.13 From constructors to classes
+### 类中的构造器
+
+ES6 classes are mostly just more convenient syntax for constructor functions.
+
+### 4.13.1 Base classes
+### 基本类
+
+In ES5, you implement constructor functions directly:
+
+                function Person(name) {
+                    this.name = name;
+                }
+                Person.prototype.describe = function () {
+                    return 'Person called '+this.name;
+                };
+
+In ES6, classes provide slightly more convenient syntax for constructor functions:
+
+                class Person {
+                    // 构造器
+                    constructor(name) {
+                        this.name = name;
+                    }
+                    // 原型上方法
+                    describe() {
+                        return 'Person called '+this.name;
+                    }
+                    // 静态方法
+                    static action(){
+
+                    }
+                }
+
+Note the compact syntax for method definitions – no keyword function needed. Also note that there are no commas between the parts of a class.
+
+注意：1 方法定义不需要function关键字 2 类中的方法之间不需要逗号
+
+### 4.13.2 Derived classes
+
+Subclassing is complicated in ES5, especially referring to super-constructors and super-properties. This is the canonical way of creating a sub-constructor Employee of Person:
+
+ES5中子类很复杂 父类-构造器 父类-属性
+
+        function Employee(name, title) {
+            Person.call(this, name); // super(name)
+            this.title = title;
+        }
+        Employee.prototype = Object.create(Person.prototype);
+        Employee.prototype.constructor = Employee;
+        Employee.prototype.describe = function () {
+            return Person.prototype.describe.call(this) // super.describe()
+                   + ' (' + this.title + ')';
+        };
+
+ES6 has built-in support for subclassing, via the extends clause:
+
+extends完成子类对父类的继承
+
+        class Employee extends Person {
+            constructor(name, title) {
+                super(name);
+                this.title = title;
+            }
+            describe() {
+                return super.describe() + ' (' + this.title + ')';
+            }
+        }
+
+
+### 4.14 From custom error constructors to subclasses of Error
+
+In ES5, it is impossible to subclass the built-in constructor for exceptions, Error. The following code shows a work-around that gives the constructor MyError important features such as a stack trace:
+
+work-around n. 工作区；变通方案；权变措施
+
+
+        function MyError() {
+            // Use Error as a function
+            var superInstance = Error.apply(null, arguments);
+            copyOwnPropertiesFrom(this, superInstance);
+        }
+        MyError.prototype = Object.create(Error.prototype);
+        MyError.prototype.constructor = MyError;
+
+        function copyOwnPropertiesFrom(target, source) {
+            Object.getOwnPropertyNames(source)
+            .forEach(function(propKey) {
+                var desc = Object.getOwnPropertyDescriptor(source, propKey);
+                Object.defineProperty(target, propKey, desc);
+            });
+            return target;
+        };
+
+In ES6, all built-in constructors can be subclassed, which is why the following code achieves what the ES5 code can only simulate:
+
+        class MyError extends Error {
+        }
