@@ -237,6 +237,116 @@ That means that octal numbers are a compact representation of all permissions, y
 
 Number.parseInt() (which does the same as the global function parseInt()) has the following signature:
 
-Number.parseInt()与window.parseInt()和一样
+Number.parseInt()与window.parseInt()用法一样
 
         Number.parseInt(string, radix?)
+
+
+### 5.2.2.1 Number.parseInt(): hexadecimal number literals
+
+Number.parseInt() provides special support for the hexadecimal literal notation – the prefix 0x (or 0X) of string is removed if:
+
+Number.parseInt() 提供对前缀为0x/0X的字符串的实现。
+
+
+  * radix is missing or 0. Then radix is set to 16. As a rule, you should never omit the radix.
+  * 基数被省略或0 基数被设为16 基数永远不要省略
+  * radix is 16.
+
+For example:
+
+        > Number.parseInt('0xFF')
+        255
+        > Number.parseInt('0xFF', 0)
+        255
+        > Number.parseInt('0xFF', 16)
+        255
+
+In all other cases, digits are only parsed until the first non-digit:
+
+在其他情况下 数字仅被解析到第一个非数字位置
+
+        > Number.parseInt('0xFF', 10)
+        0
+        > Number.parseInt('0xFF', 17)
+        0
+
+
+### 5.2.2.2 Number.parseInt(): binary and octal number literals
+
+However, Number.parseInt() does not have special support for binary or octal literals!
+
+Number.parseInt() 不支持二进制和八进制！
+
+        > Number.parseInt('0b111')
+        0
+        > Number.parseInt('0b111', 2)
+        0
+        > Number.parseInt('111', 2)
+        7
+
+        > Number.parseInt('0o10')
+        0
+        > Number.parseInt('0o10', 8)
+        0
+        > Number.parseInt('10', 8)
+        8
+
+If you want to parse these kinds of literals, you need to use Number():
+
+如果想解析所有进制就要Numner()
+
+        > Number('0b111')
+        7
+        > Number('0o10')
+        8
+
+Number.parseInt() works fine with numbers that have a different base, as long as there is no special prefix and the parameter radix is provided:
+
+只要没有前缀的情况 Number.parseInt() 可以解析不同进制 基数这个参数一定要被指定
+
+        > Number.parseInt('111', 2)
+        7
+        > Number.parseInt('10', 8)
+        8
+
+### 5.3 New static Number properties
+### Number 静态属性
+
+This section describes new properties that the constructor Number has picked up in ECMAScript 6.
+
+这一节介绍Number新属性 并且Number的构造器在ES6已经实现。
+
+
+### 5.3.1 Previously global functions
+
+Four number-related functions are already available as global functions and have been added to Number, as methods: isFinite and isNaN, parseFloat and parseInt. All of them work almost the same as their global counterparts, but isFinite and isNaN don’t coerce their arguments to numbers, anymore, which is especially important for isNaN. The following subsections explain all the details.
+
+已经在全局对象的四个函数已经在Number对象已经实现 isFinite  isNaN, parseFloat  parseInt。
+这四个函数和之前在全局上工作差不多 但是 isFinite 和 isNaN不会将参数强制转为数字型
+这一点对于isNaN很重要
+
+
+### 5.3.1.1 Number.isFinite(number)
+
+Number.isFinite(number) determines whether number is an actual number (neither Infinity nor -Infinity nor NaN):
+
+判断一个参数是否是真实的数字 当然不包含Infinity  -Infinity NaN这三项
+
+        > Number.isFinite(Infinity)
+        false
+        > Number.isFinite(-Infinity)
+        false
+        > Number.isFinite(NaN)
+        false
+        > Number.isFinite(123)
+        true
+
+The advantage of this method is that it does not coerce its parameter to number (whereas the global function does):
+
+这个方法最好有点是不强迫将参数转为数字型
+
+      > Number.isFinite('123')
+      false
+      > isFinite('123')
+      true
