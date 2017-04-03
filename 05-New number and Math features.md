@@ -237,6 +237,6 @@ That means that octal numbers are a compact representation of all permissions, y
 
 Number.parseInt() (which does the same as the global function parseInt()) has the following signature:
 
-Number.parseInt()与window.parseInt()的区别
+Number.parseInt()与window.parseInt()和一样
 
-Number.parseInt(string, radix?)
+        Number.parseInt(string, radix?)
