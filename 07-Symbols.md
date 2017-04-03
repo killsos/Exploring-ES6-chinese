@@ -460,3 +460,91 @@ Coercion to boolean is always allowed, mainly to enable truthiness checks in if 
           if (value) { ··· }
 
           param = param || 0;
+
+### 7.5.2.2 Accidentally turning symbols into property keys
+### 防止将symbols转换为属性名
+
+Symbols are special property keys, which is why you want to avoid accidentally converting them to strings, which are a different kind of property keys. This could happen if you use the addition operator to compute the name of a property:
+
+          myObject['__' + value]
+          That’s why a TypeError is thrown if value is a symbol.
+
+### 7.5.2.3 Accidentally turning symbols into Array indices
+### 不要symbol 转换为 数组索引
+
+You also don’t want to accidentally turn symbols into Array indices. The following is code where that could happen if value is a symbol:
+
+          myArray[1 + value]
+
+That’s why the addition operator throws an error in this case.
+
+### 7.5.3 Explicit and implicit conversion in the spec
+
+### 7.5.3.1 Converting to boolean
+
+To explicitly convert a symbol to boolean, you call Boolean(), which returns true for symbols:
+
+        > const sym = Symbol('hello');
+        > Boolean(sym)
+        true
+
+Boolean() computes its result via the internal operation ToBoolean(), which returns true for symbols and other truthy values.
+
+Coercion also uses ToBoolean():
+
+      > !sym
+      false
+
+### 7.5.3.2 Converting to number
+
+To explicitly convert a symbol to number, you call Number():
+
+      > const sym = Symbol('hello');
+      > Number(sym)
+      TypeError: can't convert symbol to number
+
+Number() computes its result via the internal operation ToNumber(), which throws a TypeError for symbols.
+
+Coercion also uses ToNumber():
+
+      > +sym
+      TypeError: can't convert symbol to number
+
+### 7.5.3.3 Converting to string
+
+To explicitly convert a symbol to string, you call String():
+
+      > const sym = Symbol('hello');
+      > String(sym)
+      'Symbol(hello)'
+
+If the parameter of String() is a symbol then it handles the conversion to string itself and returns the string Symbol() wrapped around the description that was provided when creating the symbol. If no description was given, the empty string is used:
+
+      > String(Symbol())
+      'Symbol()'
+
+The toString() method returns the same string as String(), but neither of these two operations calls the other one, they both call the same internal operation SymbolDescriptiveString().
+
+      > Symbol('hello').toString()
+      'Symbol(hello)'
+
+Coercion is handled via the internal operation ToString(), which throws a TypeError for symbols. One method that coerces its parameter to string is Number.parseInt():
+
+      > Number.parseInt(Symbol())
+      TypeError: can't convert symbol to string
+
+###7.5.3.4 Not allowed: converting via the binary addition operator (+)
+
+The addition operator works as follows:
+
+* Convert both operands to primitives.
+* If one of the operands is a string, coerce both operands to strings (via ToString()), concatenate them and return the result.
+
+* Otherwise, coerce both operands to numbers, add them and return the result.
+
+Coercion to either string or number throws an exception, which means that you can’t (directly) use the addition operator for symbols:
+
+      > '' + Symbol()
+      TypeError: can't convert symbol to string
+      > 1 + Symbol()
+      TypeError: can't convert symbol to number
