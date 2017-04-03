@@ -148,3 +148,124 @@ Iteration also helps with reversing strings that contain non-BMP code points (wh
                 // 'y\uD83D\uDE80x'
 
 ![str](./strings----firefox_unicode_strings_75dpi.png)
+
+
+### 6.5 Numeric values of code points
+
+The new method codePointAt() returns the numeric value of a code point at a given index in a string:
+
+        const str = 'x\uD83D\uDE80y';
+        console.log(str.codePointAt(0).toString(16)); // 78
+        console.log(str.codePointAt(1).toString(16)); // 1f680
+        console.log(str.codePointAt(3).toString(16)); // 79
+
+
+This method works well when combined with iteration over strings:
+
+        for (const ch of 'x\uD83D\uDE80y') {
+            console.log(ch.codePointAt(0).toString(16));
+        }
+        // Output:
+        // 78
+        // 1f680
+        // 79
+
+The opposite of codePointAt() is String.fromCodePoint():
+
+        > String.fromCodePoint(0x78, 0x1f680, 0x79) === 'x\uD83D\uDE80y'
+        true
+
+### 6.6 Checking for inclusion
+
+Three new methods check whether a string exists within another string:
+
+        > 'hello'.startsWith('hell')
+        true
+        > 'hello'.endsWith('ello')
+        true
+        > 'hello'.includes('ell')
+        true
+
+Each of these methods has a position as an optional second parameter, which specifies where the string to be searched starts or ends:
+
+        > 'hello'.startsWith('ello', 1)
+        true
+        > 'hello'.endsWith('hell', 4)
+        true
+
+        > 'hello'.includes('ell', 1)
+        true
+        > 'hello'.includes('ell', 2)
+        false
+
+### 6.7 Repeating strings
+
+The repeat() method repeats strings:
+
+        > 'doo '.repeat(3)
+        'doo doo doo '
+
+
+### 6.8 String methods that delegate regular expression work to their parameters
+
+In ES6, the four string methods that accept regular expression parameters do relatively little. They mainly call methods of their parameters:
+
+字符串的正则表达式
+
+        * String.prototype.match(regexp) calls  
+        regexp[Symbol.match](this).  
+
+        * String.prototype.replace(searchValue, replaceValue) calls  
+        searchValue[Symbol.replace](this, replaceValue).  
+
+        * String.prototype.search(regexp) calls  
+        regexp[Symbol.search](this).  
+
+        * String.prototype.split(separator, limit) calls
+        separator[Symbol.split](this, limit).
+
+The parameters don’t have to be regular expressions, anymore. Any objects with appropriate methods will do.
+
+
+### 6.9 Reference: the new string methods
+
+Tagged templates:
+
+String.raw(callSite, ...substitutions) : string  
+Template tag for “raw” content (backslashes are not interpreted):
+
+        > String.raw`\n` === '\\n'
+        true
+
+Unicode and code points:
+
+String.fromCodePoint(...codePoints : number[]) : string
+
+Turns numbers denoting Unicode code points into a string.
+
+String.prototype.codePointAt(pos) : number
+
+Returns the number of the code point starting at position pos (comprising one or two JavaScript characters).
+
+String.prototype.normalize(form? : string) : string
+Different combinations of code points may look the same. Unicode normalization changes them all to the same value(s), their so-called canonical representation. That helps with comparing and searching for strings. The 'NFC' form is recommended for general text.
+
+Finding strings:
+
+String.prototype.startsWith(searchString, position=0) : boolean
+
+Does the receiver start with searchString? position lets you specify where the string to be checked starts.
+
+String.prototype.endsWith(searchString, endPosition=searchString.length) : boolean
+
+Does the receiver end with searchString? endPosition lets you specify where the string to be checked ends.
+
+String.prototype.includes(searchString, position=0) : boolean
+
+Does the receiver contain searchString? position lets you specify where the string to be searched starts.
+
+Repeating strings:
+
+String.prototype.repeat(count) : string
+
+Returns the receiver, concatenated count times.
