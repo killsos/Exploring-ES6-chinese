@@ -523,7 +523,7 @@ isSafeInteger(a) && isSafeInteger(b) && isSafeInteger(a op b)
 implies that a op b is a correct result.
 
 
-5.4 New Math functionality
+### 5.4 New Math functionality
 
 The global object Math has several new methods in ECMAScript 6.
 
@@ -535,8 +535,11 @@ Math.sign(x) returns:
 
 -1 if x is a negative number (including -Infinity).
 0 if x is zero4.
+
+
 +1 if x is a positive number (including Infinity).
 NaN if x is NaN or not a number.
+
 Examples:
 
       > Math.sign(-8)
@@ -553,3 +556,189 @@ Examples:
       -1
       > Math.sign(Infinity)
       1
+
+
+### 5.4.1.2 Math.trunc(x)
+
+Math.trunc(x) removes the decimal fraction of x. Complements the other rounding methods Math.floor(), Math.ceil() and Math.round().
+
+Math.trunc(x)移除x的小数部分 并且不四舍五入 与 Math.floor()  Math.ceil()  Math.round() 就可以完整了
+
+      > Math.trunc(3.1)
+      3
+      > Math.trunc(3.9)
+      3
+      > Math.trunc(-3.1)
+      -3
+      > Math.trunc(-3.9)
+      -3
+      You could implement Math.trunc() like this:
+
+      function trunc(x) {
+          return Math.sign(x) * Math.floor(Math.abs(x));
+      }
+
+### 5.4.1.3 Math.cbrt(x)
+
+Math.cbrt(x) returns the cube root of x (∛x).
+
+
+      > Math.cbrt(8)
+      2
+
+### 5.4.2 Using 0 instead of 1 with exponentiation and logarithm
+
+A small fraction can be represented more precisely if it comes after zero. I’ll demonstrate this with decimal fractions (JavaScript’s numbers are internally stored with base 2, but the same reasoning applies).
+
+Floating point numbers with base 10 are internally represented as mantissa × 10exponent. The mantissa has a single digit before the decimal dot and the exponent “moves” the dot as necessary. That means if you convert a small fraction to the internal representation, a zero before the dot leads to a smaller mantissa than a one before the dot. For example:
+
+      * (A) 0.000000234 = 2.34 × 10−7. Significant digits: 234
+      * (B) 1.000000234 = 1.000000234 × 100. Significant digits: 1000000234
+
+Precision-wise, the important quantity here is the capacity of the mantissa, as measured in significant digits. That’s why (A) gives you higher precision than (B).
+
+Additionally, JavaScript represents numbers close to zero (e.g. small fractions) with higher precision.
+
+### 5.4.2.1 Math.expm1(x)
+
+Math.expm1(x) returns Math.exp(x)-1. The inverse of Math.log1p().
+
+Therefore, this method provides higher precision whenever Math.exp() has results close to 1.
+
+You can see the difference between the two in the following interaction:
+
+        > Math.expm1(1e-10)
+        1.00000000005e-10
+        > Math.exp(1e-10)-1
+        1.000000082740371e-10
+
+
+The former is the better result, which you can verify by using a library (such as decimal.js) for floating point numbers with arbitrary precision (“bigfloats”):
+
+        > var Decimal = require('decimal.js').config({precision:50});
+        > new Decimal(1e-10).exp().minus(1).toString()
+        '1.000000000050000000001666666666708333333e-10'
+
+[decimal.js]https://github.com/MikeMcl/decimal.js/
+
+
+### 5.4.2.2 Math.log1p(x)
+
+Math.log1p(x) returns Math.log(1 + x). The inverse of Math.expm1().
+
+Therefore, this method lets you specify parameters that are close to 1 with a higher precision. The following examples demonstrate why that is.
+
+The following two calls of log() produce the same result:
+
+        > Math.log(1 + 1e-16)
+        0
+        > Math.log(1 + 0)
+        0
+        In contrast, log1p() produces different results:
+
+        > Math.log1p(1e-16)
+        1e-16
+        > Math.log1p(0)
+        0
+
+The reason for the higher precision of Math.log1p() is that the correct result for 1 + 1e-16 has more significant digits than 1e-16:
+
+        > 1 + 1e-16 === 1
+        true
+        > 1e-16 === 0
+        false
+
+### 5.4.3 Logarithms to base 2 and 10
+
+### 5.4.3.1 Math.log2(x)
+
+Math.log2(x) computes the logarithm to base 2.
+
+        > Math.log2(8)
+        3
+        5.4.3.2 Math.log10(x)
+
+
+Math.log10(x) computes the logarithm to base 10.
+
+        > Math.log10(100)
+        2
+
+### 5.4.4 Support for compiling to JavaScript
+
+[Emscripten](https://github.com/kripken/emscripten) pioneered a coding style that was later picked up by asm.js: The operations of a virtual machine (think bytecode) are expressed in static subset of JavaScript. That subset can be executed efficiently by JavaScript engines: If it is the result of a compilation from C++, it runs at about 70% of native speed.
+
+The following Math methods were mainly added to support asm.js and similar compilation strategies, they are not that useful for other applications.
+
+### 5.4.4.1 Math.fround(x)
+
+Math.fround(x) rounds x to a 32 bit floating point value (float). Used by asm.js to tell an engine to internally use a float value.
+
+### 5.4.4.2 Math.imul(x, y)
+
+Math.imul(x, y) multiplies the two 32 bit integers x and y and returns the lower 32 bits of the result. This is the only 32 bit basic math operation that can’t be simulated by using a JavaScript operator and coercing the result back to 32 bits. For example, idiv could be implemented as follows:
+
+        function idiv(x, y) {
+            return (x / y) | 0;
+        }
+
+In contrast, multiplying two large 32 bit integers may produce a double that is so large that lower bits are lost.
+
+### 5.4.5 Bitwise operations
+
+Math.clz32(x)
+Counts the leading zero bits in the 32 bit integer x.
+
+          > Math.clz32(0b01000000000000000000000000000000)
+          1
+          > Math.clz32(0b00100000000000000000000000000000)
+          2
+          > Math.clz32(2)
+          30
+          > Math.clz32(1)
+          31
+
+
+Why is this interesting? Quoting [“Fast, Deterministic, and Portable Counting Leading Zeros” by Miro Samek:](http://embeddedgurus.com/state-space/2014/09/fast-deterministic-and-portable-counting-leading-zeros/)
+
+Counting leading zeros in an integer number is a critical operation in many DSP algorithms, such as normalization of samples in sound or video processing, as well as in real-time schedulers to quickly find the highest-priority task ready-to-run.
+
+
+### 5.4.6 Trigonometric methods
+
+* Math.sinh(x)
+Computes the hyperbolic sine of x.
+
+* Math.cosh(x)
+Computes the hyperbolic cosine of x.
+
+* Math.tanh(x)
+Computes the hyperbolic tangent of x.
+
+* Math.asinh(x)
+Computes the inverse hyperbolic sine of x.
+
+* Math.acosh(x)
+Computes the inverse hyperbolic cosine of x.
+
+* Math.atanh(x)
+Computes the inverse hyperbolic tangent of x.
+
+* Math.hypot(...values)
+Computes the square root of the sum of the squares of its arguments (Pythagoras’ theorem):
+
+
+        > Math.hypot(3, 4)
+        5    
+
+
+### 5.5 FAQ: numbers
+Frequently Asked Question
+
+### 5.5.1 How can I use integers beyond JavaScript’s 53 bit range?
+
+JavaScript’s integers have a range of 53 bits. That is a problem whenever 64 bit integers are needed. For example: In its JSON API, Twitter had to switch from integers to strings when tweet IDs became too large.
+
+At the moment, the only way around that limitation is to use a library for higher-precision numbers (bigints or bigfloats). One such library is decimal.js.
+
+Plans to support larger integers in JavaScript exist, but may take a while to come to fruition.
