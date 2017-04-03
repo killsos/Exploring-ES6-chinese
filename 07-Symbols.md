@@ -735,21 +735,33 @@ The global object Symbol has several properties that serve as constants for so-c
 
 Customizing basic language operations (explained in Chap. “New OOP features besides classes”):
 Symbol.hasInstance (method)
+
 Lets an object C customize the behavior of x instanceof C.
+
 Symbol.toPrimitive (method)
+
 Lets an object customize how it is converted to a primitive value. This is the first step whenever something is coerced to a primitive type (via operators etc.).
+
 Symbol.toStringTag (string)
 Called by Object.prototype.toString() to compute the default string description of an object obj: ‘[object ‘+obj[Symbol.toStringTag]+’]’.
+
 Symbol.unscopables (Object)
 Lets an object hide some properties from the with statement.
 Iteration (explained in the chapter on iteration):
+
 Symbol.iterator (method)
 A method with this key makes an object iterable (its contents can be iterated over by language constructs such as the for-of loop and the spread operator (...)). The method returns an iterator. Details: chapter “Iterables and iterators”.
+
 Forwarding string methods: The following string methods are forwarded to methods of their parameters (usually regular expressions).
+
 String.prototype.match(x, ···) is forwarded to x[Symbol.match](···).
+
 String.prototype.replace(x, ···) is forwarded to x[Symbol.replace](···).
+
 String.prototype.search(x, ···) is forwarded to x[Symbol.search](···).
+
 String.prototype.split(x, ···) is forwarded to x[Symbol.split](···).
+
 The details are explained in Sect. “String methods that delegate regular expression work to their parameters” in the chapter on strings.
 
 Miscellaneous:
@@ -758,11 +770,12 @@ Configures how built-in methods (such as Array.prototype.map()) create objects t
 Symbol.isConcatSpreadable (boolean)
 Configures whether Array.prototype.concat() adds the indexed elements of an object to its result (“spreading”) or the object as a single element (details are explained in the chapter on Arrays).
 
-### 7.10.5 Global symbol registry 
+### 7.10.5 Global symbol registry
 
 If you want a symbol to be the same in all realms, you need to use the global symbol registry, via the following two methods:
 
 Symbol.for(str) : symbol
 Returns the symbol whose key is the string str in the registry. If str isn’t in the registry yet, a new symbol is created and filed in the registry under the key str.
+
 Symbol.keyFor(sym) : string
 returns the string that is associated with the symbol sym in the registry. If sym isn’t in the registry, this method returns undefined. This method can be used to serialize symbols (e.g. to JSON).
