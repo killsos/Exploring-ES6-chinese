@@ -343,6 +343,7 @@ Being able to create properties whose keys never clash with other keys is useful
 
 
 ### 7.4.1 Symbols as keys of non-public properties
+### Symbols用来创建私有属性
 
 Whenever there are inheritance hierarchies in JavaScript (e.g. created via classes, mixins or a purely prototypal approach), you have two kinds of properties:
 
@@ -351,3 +352,111 @@ Public properties are seen by clients of the code.
 Private properties are used internally within the pieces (e.g. classes, mixins or objects) that make up the inheritance hierarchy. (Protected properties are shared between several pieces and face the same issues as private properties.)
 
 For usability’s sake, public properties usually have string keys. But for private properties with string keys, accidental name clashes can become a problem. Therefore, symbols are a good choice. For example, in the following code, symbols are used for the private properties _counter and _action.
+
+          const _counter = Symbol('counter');
+          const _action = Symbol('action');
+          class Countdown {
+              constructor(counter, action) {
+                  this[_counter] = counter;
+                  this[_action] = action;
+              }
+              dec() {
+                  let counter = this[_counter];
+                  if (counter < 1) return;
+                  counter--;
+                  this[_counter] = counter;
+                  if (counter === 0) {
+                      this[_action]();
+                  }
+              }
+          }
+
+
+Note that symbols only protect you from name clashes, not from unauthorized access, because you can find out all own property keys – including symbols – of an object via Reflect.ownKeys(). If you want protection there, as well, you can use one of the approaches listed in Sect
+
+### 7.4.2 Symbols as keys of meta-level properties
+
+Symbols having unique identities makes them ideal as keys of public properties that exist on a different level than “normal” property keys, because meta-level keys and normal keys must not clash. One example of meta-level properties are methods that objects can implement to customize how they are treated by a library. Using symbol keys protects the library from mistaking normal methods as customization methods.
+
+ES6 Iterability is one such customization. An object is iterable if it has a method whose key is the symbol (stored in) Symbol.iterator. In the following code, obj is iterable.
+
+        const obj = {
+            data: [ 'hello', 'world' ],
+            [Symbol.iterator]() {
+                ···
+            }
+        };
+
+The iterability of obj enables you to use the for-of loop and similar JavaScript features:
+
+        for (const x of obj) {
+            console.log(x);
+        }
+
+        // Output:
+        // hello
+        // world
+
+### 7.4.3 Examples of name clashes in JavaScript’s standard library
+
+In case you think that name clashes don’t matter, here are three examples of where name clashes caused problems in the evolution of the JavaScript standard library:
+
+* When the new method Array.prototype.values() was created, it broke existing code where with was used with an Array and shadowed a variable values in an outer scope (bug report 1, bug report 2). Therefore, a mechanism was introduced to hide properties from with (Symbol.unscopables).
+
+* Array.prototype.values()
+
+* String.prototype.contains clashed with a method added by MooTools and had to be renamed to String.prototype.includes (bug report).
+
+* String.prototype.includes
+
+
+* The ES2016 method Array.prototype.contains also clashed with a method added by MooTools and had to be renamed to Array.prototype.includes (bug report).
+
+* Array.prototype.includes
+
+In contrast, adding iterability to an object via the property key Symbol.iterator can’t cause problems, because that key doesn’t clash with anything.
+
+
+### 7.5 Converting symbols to other primitive types
+
+The following table shows what happens if you explicitly or implicitly convert symbols to other primitive types:
+
+| Conversion to 转换方法     | 	Explicit conversion 显式转换    | 	Coercion (implicit conversion) 隐式转换 强制转换    |
+| :------------- | :------------- |:------------- |
+| boolean       | 	Boolean(sym) → OK      |!sym → OK       |
+| number      | 	Number(sym) → TypeError       |sym*2 → TypeError     |
+| string      | 	String(sym) → OK       |''+sym → TypeError       |
+| string      | 	sym.toString() → OK       |	`${sym}` → TypeError      |
+
+布尔 无论显式还是隐式都可以
+数字 无论显式还是隐式都不可以
+字符串 只有显式转换可以 隐式不可以
+
+### 7.5.1 Pitfall: coercion to string
+### 易犯错误 强制转为字符串
+
+Coercion to string being forbidden can easily trip you up:
+
+trip up 挑剔 绊倒
+
+          const sym = Symbol();
+
+          console.log('A symbol: '+sym); // TypeError
+          console.log(`A symbol: ${sym}`); // TypeError
+
+To fix these problems, you need an explicit conversion to string:
+
+          console.log('A symbol: '+String(sym)); // OK
+          console.log(`A symbol: ${String(sym)}`); // OK
+
+### 7.5.2 Making sense of the coercion rules
+
+Coercion (implicit conversion) is often forbidden for symbols. This section explains why.
+
+### 7.5.2.1 Truthiness checks are allowed
+
+Coercion to boolean is always allowed, mainly to enable truthiness checks in if statements and other locations:
+
+          if (value) { ··· }
+
+          param = param || 0;
