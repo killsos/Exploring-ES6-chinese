@@ -294,7 +294,7 @@ Number.parseInt() 不支持二进制和八进制！
 
 If you want to parse these kinds of literals, you need to use Number():
 
-如果想解析所有进制就要Numner()
+如果想解析所有进制就要Number()
 
         > Number('0b111')
         7
@@ -344,9 +344,212 @@ Number.isFinite(number) determines whether number is an actual number (neither I
 
 The advantage of this method is that it does not coerce its parameter to number (whereas the global function does):
 
-这个方法最好有点是不强迫将参数转为数字型
+这个方法最好优点是不强迫将参数转为数字型
 
       > Number.isFinite('123')
       false
       > isFinite('123')
       true
+
+### 5.3.1.2 Number.isNaN(number)
+
+Number.isNaN(number) checks whether number is the value NaN.
+
+One ES5 way of making this check is via !==:
+
+在ES5下通过!==的比较
+
+      > const x = NaN;
+      > x !== x
+      true
+
+A more descriptive way is via the global function isNaN():
+还有一点着重介绍的是isNaN在ES5是一个全局方法
+
+      > const x = NaN;
+      > isNaN(x)
+      true
+
+However, this function coerces non-numbers to numbers and returns true if the result is NaN (which is usually not what you want):
+
+但是这个函数强制将参数转为数字型 在这个转换过程如果返回时NaN最后结果true 但是这不是我们想要的
+
+      > isNaN('???')
+      true
+
+The new method Number.isNaN() does not exhibit this problem, because it does not coerce its arguments to numbers:
+
+      > Number.isNaN('???')
+      false
+
+### 5.3.1.3 Number.parseFloat and Number.parseInt
+
+The following two methods work exactly like the global functions with the same names. They were added to Number for completeness sake; now all number-related functions are available there.
+
+for...sake 为了...缘故 目的
+
+为了Number的完整性添加下面两个方法 现在与数字相关的函数几乎完整了
+
+      Number.parseFloat(string)
+      Number.parseInt(string, radix)
+
+### 5.3.2 Number.EPSILON
+
+Especially with decimal fractions, rounding errors can become a problem in JavaScript3. For example, 0.1 and 0.2 can’t be represented precisely, which you notice if you add them and compare them to 0.3 (which can’t be represented precisely, either).
+
+由于ES3的小数部分进行运算之后产生的偏差  Number.EPSILON就是为了解决这个
+
+      > 0.1 + 0.2 === 0.3
+      false
+
+
+Number.EPSILON specifies a reasonable margin of error when comparing floating point numbers. It provides a better way to compare floating point values, as demonstrated by the following function.
+
+      function epsEqu(x, y) {
+          return Math.abs(x - y) < Number.EPSILON;
+      }
+      console.log(epsEqu(0.1+0.2, 0.3)); // true
+
+### 5.3.3 Number.isInteger(number)
+
+JavaScript has only floating point numbers (doubles). Accordingly, integers are simply floating point numbers without a decimal fraction.
+
+JavaScript仅提供了浮点数 因此 整数就是浮点数没有小数部分
+
+Number.isInteger(number) returns true if number is a number and does not have a decimal fraction.
+
+Number.isInteger验证参数是否有小数部分 如果没有 返回真
+
+
+      > Number.isInteger(-17)
+      true
+      > Number.isInteger(33)
+      true
+      > Number.isInteger(33.1)
+      false
+      > Number.isInteger('33')
+      false
+      > Number.isInteger(NaN)
+      false
+      > Number.isInteger(Infinity)
+      false
+
+### 5.3.4 Safe integers
+
+JavaScript numbers have only enough storage space to represent 53 bit signed integers. That is, integers i in the range −2**253 < i < 2**253 are safe. What exactly that means is explained momentarily. The following properties help determine whether a JavaScript integer is safe:
+
+JavaScript仅提供53位有符号的二进制位来存储数字 整数在−2**253 < i < 2**253是安全
+
+
+      Number.isSafeInteger(number)
+      Number.MIN_SAFE_INTEGER
+      Number.MAX_SAFE_INTEGER
+
+The notion of safe integers centers on how mathematical integers are represented in JavaScript. In the range (−2**253, 2**253) (excluding the lower and upper bounds), JavaScript integers are safe: there is a one-to-one mapping between them and the mathematical integers they represent.
+
+
+Beyond this range, JavaScript integers are unsafe: two or more mathematical integers are represented as the same JavaScript integer. For example, starting at 253, JavaScript can represent only every second mathematical integer:
+
+        > Math.pow(2, 53)
+        9007199254740992
+
+        > 9007199254740992
+        9007199254740992
+        > 9007199254740993
+        9007199254740992
+        > 9007199254740994
+        9007199254740994
+        > 9007199254740995
+        9007199254740996
+        > 9007199254740996
+        9007199254740996
+        > 9007199254740997
+        9007199254740996
+
+Therefore, a safe JavaScript integer is one that unambiguously represents a single mathematical integer.
+
+### 5.3.4.1 Static Number properties related to safe integers
+
+The two static Number properties specifying the lower and upper bound of safe integers could be defined as follows:
+
+          Number.MAX_SAFE_INTEGER = Math.pow(2, 53)-1;
+          Number.MIN_SAFE_INTEGER = -Number.MAX_SAFE_INTEGER;
+
+Number.isSafeInteger() determines whether a JavaScript number is a safe integer and could be defined as follows:
+
+        Number.isSafeInteger = function (n) {
+            return (typeof n === 'number' &&
+                Math.round(n) === n &&
+                Number.MIN_SAFE_INTEGER <= n &&
+                n <= Number.MAX_SAFE_INTEGER);
+        }
+
+
+For a given value n, this function first checks whether n is a number and an integer. If both checks succeed, n is safe if it is greater than or equal to MIN_SAFE_INTEGER and less than or equal to MAX_SAFE_INTEGER.
+
+### 5.3.4.2 When are computations with integers correct?
+
+How can we make sure that results of computations with integers are correct? For example, the following result is clearly not correct:
+
+        > 9007199254740990 + 3
+        9007199254740992
+
+We have two safe operands, but an unsafe result:
+
+          > Number.isSafeInteger(9007199254740990)
+          true
+          > Number.isSafeInteger(3)
+          true
+          > Number.isSafeInteger(9007199254740992)
+          false
+
+The following result is also incorrect:
+
+          > 9007199254740995 - 10
+          9007199254740986
+
+This time, the result is safe, but one of the operands isn’t:
+
+        > Number.isSafeInteger(9007199254740995)
+        false
+        > Number.isSafeInteger(10)
+        true
+        > Number.isSafeInteger(9007199254740986)
+        true
+
+Therefore, the result of applying an integer operator op is guaranteed to be correct only if all operands and the result are safe. More formally:
+
+isSafeInteger(a) && isSafeInteger(b) && isSafeInteger(a op b)
+implies that a op b is a correct result.
+
+
+5.4 New Math functionality
+
+The global object Math has several new methods in ECMAScript 6.
+
+### 5.4.1 Various numerical functionality
+
+### 5.4.1.1 Math.sign(x)
+
+Math.sign(x) returns:
+
+-1 if x is a negative number (including -Infinity).
+0 if x is zero4.
++1 if x is a positive number (including Infinity).
+NaN if x is NaN or not a number.
+Examples:
+
+      > Math.sign(-8)
+      -1
+      > Math.sign(3)
+      1
+
+      > Math.sign(0)
+      0
+      > Math.sign(NaN)
+      NaN
+
+      > Math.sign(-Infinity)
+      -1
+      > Math.sign(Infinity)
+      1
