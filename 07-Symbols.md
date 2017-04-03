@@ -147,4 +147,63 @@ The following operations ignore symbols as property keys:
         for-in loop
 
 
-### 7.2 A new primitive type 
+### 7.2 A new primitive type
+
+ECMAScript 6 introduces a new primitive type: symbols. They are tokens that serve as unique IDs. You create symbols via the factory function Symbol() (which is loosely similar to String returning strings if called as a function):
+
+symbols生成唯一ID
+
+          const symbol1 = Symbol();
+
+Symbol() has an optional string-valued parameter that lets you give the newly created Symbol a description. That description is used when the symbol is converted to a string (via toString() or String()):
+
+Symbol()有字符串参数 可以创建Symbol()的字符串描述 这个描述通常用来通过toString()的方法或String()
+
+          > const symbol2 = Symbol('symbol2');
+          > String(symbol2)
+          'Symbol(symbol2)'
+
+
+Every symbol returned by Symbol() is unique, every symbol has its own identity:
+
+每一个symbol生成唯一个ID
+
+          > Symbol() === Symbol()
+          false
+
+
+You can see that symbols are primitive if you apply the typeof operator to one of them – it will return a new symbol-specific result:
+
+        > typeof Symbol()
+        'symbol'
+
+### 7.2.1 Symbols as property keys
+
+Symbols can be used as property keys:
+
+        const MY_KEY = Symbol();
+        const obj = {};
+
+        obj[MY_KEY] = 123;
+        console.log(obj[MY_KEY]); // 123
+
+
+Classes and object literals have a feature called computed property keys: You can specify the key of a property via an expression, by putting it in square brackets. In the following object literal, we use a computed property key to make the value of MY_KEY the key of a property.
+
+可以方括号使用symbol
+
+        const MY_KEY = Symbol();
+        const obj = {
+            [MY_KEY]: 123
+        };
+
+
+A method definition can also have a computed key:
+
+        const FOO = Symbol();
+        const obj = {
+            [FOO]() {
+                return 'bar';
+            }
+        };
+        console.log(obj[FOO]()); // bar
