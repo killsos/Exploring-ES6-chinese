@@ -68,3 +68,73 @@ Literals are syntactic constructs that produce values. Examples include string l
 * Tagged template literals (short: tagged templates): are function calls whose parameters are provided via template literals.
 
 It is important to keep in mind that the names of template literals and tagged templates are slightly misleading. They have nothing to do with templates, as often used in web development: text files with blanks that can be filled in via (e.g.) JSON data.
+
+### 8.2.1 Template literals
+
+A template literal is a new kind of string literal that can span multiple lines and interpolate expressions (include their results). For example:
+
+模板字面量是一种新的字符串自变量 支持多行和插值表达式
+
+        const firstName = 'Jane';
+        console.log(`Hello ${firstName}!
+        How are you
+        today?`);
+
+        // Output:
+        // Hello Jane!
+        // How are you
+        // today?
+
+The literal itself is delimited by backticks (`), the interpolated expressions inside the literal are delimited by ${ and }. Template literals always produce strings.
+
+用反引号来界定 插值用${}
+
+### 8.2.2 Escaping in template literals
+### 模板字面量的转义
+
+The backslash is used for escaping inside template literals.
+
+\ 用来转义模板字面量
+
+It enables you to mention backticks and ${ inside template literals:
+
+          > `\``
+          '`'
+
+          > `$` // OK
+          '$'
+
+          > `${`
+          SyntaxError
+          > `\${`
+          '${'
+          > `\${}`
+          '${}'
+
+Other than that, the backslash works like in string literals:
+
+          > `\\`
+          '\\'
+          > `\n`
+          '\n'
+          > `\u{58}`
+          'X'
+
+### 8.2.3 Line terminators in template literals are always LF (\n)
+### 模板字面量用\n 换行
+
+Common ways of terminating lines are:
+
+* Line feed (LF, \n, U+000A): used by Unix (incl. current macOS)
+
+* Carriage return (CR, \r, U+000D): used by the old Mac OS.
+
+* CRLF (\r\n): used by Windows.
+
+All of these line terminators are normalized to LF in template literals. That is, the following code logs true on all platforms:
+
+          const str = `BEFORE
+          AFTER`;
+          console.log(str === 'BEFORE\nAFTER'); // true
+
+<img src="./leanpub_gears.png" width="100" >
