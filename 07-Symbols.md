@@ -35,3 +35,73 @@
   * 7.10.5. Global symbol registry
 
 ---
+
+### 7.1 Overview
+
+Symbols are a new primitive type in ECMAScript 6. They are created via a factory function:
+
+Symbols是ES6新的字面量类型 Symbols是创建通过工厂函数
+
+        const mySymbol = Symbol('mySymbol');
+
+Every time you call the factory function, a new and unique symbol is created. The optional parameter is a descriptive string that is shown when printing the symbol (it has no other purpose):
+
+每一次调用工厂函数就会创建一个唯一的symbol 在创建symbol的工厂函数可以加一个字符串描述 在输出symbol的就会输出字符串
+
+        > mySymbol
+        Symbol(mySymbol)
+
+### 7.1.1 Use case 1: unique property keys
+
+Symbols are mainly used as unique property keys – a symbol never clashes with any other property key (symbol or string). For example, you can make an object iterable (usable via the for-of loop and other language mechanisms), by using the symbol stored in Symbol.iterator as the key of a method
+
+Symbols是被用来描述一个唯一属性key 永远不会其他Symbols或者字符串属性重复
+
+举个例子 如果对象可以遍历通过for-of 用Symbols存储Symbol.iterator作为这个方法的key
+
+
+        const iterableObject = {
+            [Symbol.iterator]() { // (A)
+                ···
+            }
+        }
+        for (const x of iterableObject) {
+            console.log(x);
+        }
+        // Output:
+        // hello
+        // world
+
+In line A, a symbol is used as the key of the method. This unique marker makes the object iterable and enables us to use the for-of loop.
+
+### 7.1.2 Use case 2: constants representing concepts
+
+In ECMAScript 5, you may have used strings to represent concepts such as colors. In ES6, you can use symbols and be sure that they are always unique:
+
+        const COLOR_RED    = Symbol('Red');
+        const COLOR_ORANGE = Symbol('Orange');
+        const COLOR_YELLOW = Symbol('Yellow');
+        const COLOR_GREEN  = Symbol('Green');
+        const COLOR_BLUE   = Symbol('Blue');
+        const COLOR_VIOLET = Symbol('Violet');
+
+        function getComplement(color) {
+            switch (color) {
+                case COLOR_RED:
+                    return COLOR_GREEN;
+                case COLOR_ORANGE:
+                    return COLOR_BLUE;
+                case COLOR_YELLOW:
+                    return COLOR_VIOLET;
+                case COLOR_GREEN:
+                    return COLOR_RED;
+                case COLOR_BLUE:
+                    return COLOR_ORANGE;
+                case COLOR_VIOLET:
+                    return COLOR_YELLOW;
+                default:
+                    throw new Exception('Unknown color: '+color);
+            }
+        }
+        
+Every time you call Symbol('Red'), a new symbol is created. Therefore, COLOR_RED can never be mistaken for another value. That would be different if it were the string 'Red'.
