@@ -231,7 +231,7 @@ The parameters don’t have to be regular expressions, anymore. Any objects with
 
 Tagged templates:
 
-String.raw(callSite, ...substitutions) : string  
+* String.raw(callSite, ...substitutions) : string  
 Template tag for “raw” content (backslashes are not interpreted):
 
         > String.raw`\n` === '\\n'
@@ -239,33 +239,33 @@ Template tag for “raw” content (backslashes are not interpreted):
 
 Unicode and code points:
 
-String.fromCodePoint(...codePoints : number[]) : string
+* String.fromCodePoint(...codePoints : number[]) : string
 
 Turns numbers denoting Unicode code points into a string.
 
-String.prototype.codePointAt(pos) : number
+* String.prototype.codePointAt(pos) : number
 
 Returns the number of the code point starting at position pos (comprising one or two JavaScript characters).
 
-String.prototype.normalize(form? : string) : string
+* String.prototype.normalize(form? : string) : string
 Different combinations of code points may look the same. Unicode normalization changes them all to the same value(s), their so-called canonical representation. That helps with comparing and searching for strings. The 'NFC' form is recommended for general text.
 
-Finding strings:
+* Finding strings:
 
-String.prototype.startsWith(searchString, position=0) : boolean
+* String.prototype.startsWith(searchString, position=0) : boolean
 
 Does the receiver start with searchString? position lets you specify where the string to be checked starts.
 
-String.prototype.endsWith(searchString, endPosition=searchString.length) : boolean
+* String.prototype.endsWith(searchString, endPosition=searchString.length) : boolean
 
 Does the receiver end with searchString? endPosition lets you specify where the string to be checked ends.
 
-String.prototype.includes(searchString, position=0) : boolean
+* String.prototype.includes(searchString, position=0) : boolean
 
 Does the receiver contain searchString? position lets you specify where the string to be searched starts.
 
-Repeating strings:
+* Repeating strings:
 
-String.prototype.repeat(count) : string
+* String.prototype.repeat(count) : string
 
 Returns the receiver, concatenated count times.
