@@ -103,5 +103,48 @@ In ECMAScript 5, you may have used strings to represent concepts such as colors.
                     throw new Exception('Unknown color: '+color);
             }
         }
-        
+
 Every time you call Symbol('Red'), a new symbol is created. Therefore, COLOR_RED can never be mistaken for another value. That would be different if it were the string 'Red'.
+
+### 7.1.3 Pitfall: you can’t coerce symbols to strings
+### 易犯错误: 不能将symbols转为字符串
+
+Coercing (implicitly converting) symbols to strings throws exceptions:
+
+symbols转为字符串会抛出错误TypeError
+
+        const sym = Symbol('desc');
+
+        const str1 = '' + sym; // TypeError
+        const str2 = `${sym}`; // TypeError
+
+The only solution is to convert explicitly:
+
+仅有一个显式的转换为的方法
+
+        const str2 = String(sym); // 'Symbol(desc)'
+        const str3 = sym.toString(); // 'Symbol(desc)'
+
+Forbidding coercion prevents some errors, but also makes working with symbols more complicated.
+
+### 7.1.4 Which operations related to property keys are aware of symbols?
+
+The following operations are aware of symbols as property keys:
+
+下面的操作将认为symbols属性关键字是属性
+
+
+        Reflect.ownKeys()
+        Property access via []
+        Object.assign()
+
+The following operations ignore symbols as property keys:
+
+下面的操作将忽略symbols属性关键字
+
+        Object.keys()
+        Object.getOwnPropertyNames()
+        for-in loop
+
+
+### 7.2 A new primitive type 
