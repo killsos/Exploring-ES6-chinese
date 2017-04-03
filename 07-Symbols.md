@@ -207,3 +207,147 @@ A method definition can also have a computed key:
             }
         };
         console.log(obj[FOO]()); // bar
+
+
+### 7.2.2 Enumerating own property keys
+
+Given that there is now a new kind of value that can become the key of a property, the following terminology is used for ECMAScript 6:
+
+* Property keys are either strings or symbols.
+
+* 属性可以字符串或symbols
+
+* String-valued property keys are called property names.
+
+* 字符串值属性名可以调用
+
+* Symbol-valued property keys are called property symbols.
+
+* Symbol值属性名可以调用
+
+Let’s examine the APIs for enumerating own property keys by first creating an object.
+
+            const obj = {
+                [Symbol('my_key')]: 1,
+                enum: 2,
+                nonEnum: 3
+            };
+
+* Object.defineProperty(obj,'nonEnum', { enumerable: false });
+* 定义一个属性 添加的对象  属性名 属性配置对象{}
+
+* Object.getOwnPropertyNames()  
+* 只返回字符串属性 忽略symbol-valued属性名 ignores symbol-valued property keys:
+
+            > Object.getOwnPropertyNames(obj)
+            ['enum', 'nonEnum']
+
+* Object.getOwnPropertySymbols() ignores string-valued property keys:
+* Object.getOwnPropertySymbols() 只返回symbol名字的属性
+
+            > Object.getOwnPropertySymbols(obj)
+            [Symbol(my_key)]
+
+* Reflect.ownKeys() considers all kinds of keys:
+* Reflect.ownKeys()返回 字符串 symbol为名所有属性
+
+            > Reflect.ownKeys(obj)
+            [Symbol(my_key), 'enum', 'nonEnum']
+
+* Object.keys() only considers enumerable property keys that are strings:
+* Object.keys()返回可枚举的字符串属性
+
+            > Object.keys(obj)
+            ['enum']
+
+
+The name Object.keys clashes with the new terminology (only string keys are listed). Object.names or Object.getEnumerableOwnPropertyNames would be a better choice now.
+
+
+
+### 7.3 Using symbols to represent concepts
+
+In ECMAScript 5, one often represents concepts (think enum constants) via strings. For example:
+
+          var COLOR_RED    = 'Red';
+          var COLOR_ORANGE = 'Orange';
+          var COLOR_YELLOW = 'Yellow';
+          var COLOR_GREEN  = 'Green';
+          var COLOR_BLUE   = 'Blue';
+          var COLOR_VIOLET = 'Violet';
+
+However, strings are not as unique as we’d like them to be. To see why, let’s look at the following function.
+
+        function getComplement(color) {
+            switch (color) {
+                case COLOR_RED:
+                    return COLOR_GREEN;
+                case COLOR_ORANGE:
+                    return COLOR_BLUE;
+                case COLOR_YELLOW:
+                    return COLOR_VIOLET;
+                case COLOR_GREEN:
+                    return COLOR_RED;
+                case COLOR_BLUE:
+                    return COLOR_ORANGE;
+                case COLOR_VIOLET:
+                    return COLOR_YELLOW;
+                default:
+                    throw new Exception('Unknown color: '+color);
+            }
+        }
+
+It is noteworthy that you can use arbitrary expressions as switch cases, you are not limited in any way. For example:
+
+        function isThree(x) {
+            switch (x) {
+                case 1 + 1 + 1:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+We use the flexibility that switch offers us and refer to the colors via our constants (COLOR_RED etc.) instead of hard-coding them ('RED' etc.).
+
+Interestingly, even though we do so, there can still be mix-ups. For example, someone may define a constant for a mood:
+
+        var MOOD_BLUE = 'BLUE';
+
+Now the value of BLUE is not unique anymore and MOOD_BLUE can be mistaken for it. If you use it as a parameter for getComplement(), it returns 'ORANGE' where it should throw an exception.
+
+Let’s use symbols to fix this example. Now we can also use the ES6 feature const, which lets us declare actual constants (you can’t change what value is bound to a constant, but the value itself may be mutable).
+
+        const COLOR_RED    = Symbol('Red');
+        const COLOR_ORANGE = Symbol('Orange');
+        const COLOR_YELLOW = Symbol('Yellow');
+        const COLOR_GREEN  = Symbol('Green');
+        const COLOR_BLUE   = Symbol('Blue');
+        const COLOR_VIOLET = Symbol('Violet');
+
+Each value returned by Symbol is unique, which is why no other value can be mistaken for BLUE now. Intriguingly, the code of getComplement() doesn’t change at all if we use symbols instead of strings, which shows how similar they are.
+
+### 7.4 Symbols as keys of properties
+
+Being able to create properties whose keys never clash with other keys is useful in two situations:
+
+用symbols做为属性两种情况:
+
+* For non-public properties in inheritance hierarchies.
+
+* 对继承的非公开属性
+
+* To keep meta-level properties from clashing with base-level properties.
+
+* 防止meta-level属性与基本属性的冲突
+
+
+### 7.4.1 Symbols as keys of non-public properties
+
+Whenever there are inheritance hierarchies in JavaScript (e.g. created via classes, mixins or a purely prototypal approach), you have two kinds of properties:
+
+Public properties are seen by clients of the code.
+
+Private properties are used internally within the pieces (e.g. classes, mixins or objects) that make up the inheritance hierarchy. (Protected properties are shared between several pieces and face the same issues as private properties.)
+
+For usability’s sake, public properties usually have string keys. But for private properties with string keys, accidental name clashes can become a problem. Therefore, symbols are a good choice. For example, in the following code, symbols are used for the private properties _counter and _action.
