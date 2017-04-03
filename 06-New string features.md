@@ -126,6 +126,7 @@ The string iterator splits strings along code point boundaries, which means that
 ### 6.4.2 Counting code points
 
 Iteration gives you a quick way to count the Unicode code points in a string:
+
 字符串可以快速遍历Unicode编码
 
             > [...'x\uD83D\uDE80y'].length
@@ -146,4 +147,4 @@ Iteration also helps with reversing strings that contain non-BMP code points (wh
             console.log([...str].reverse().join(''));
                 // 'y\uD83D\uDE80x'
 
-![](./strings----firefox_unicode_strings_75dpi.png)
+![str](./strings----firefox_unicode_strings_75dpi.png)
