@@ -146,3 +146,103 @@ The TRV of LineTerminatorSequence :: <LF> is the code unit value 0x000A.
 The TRV of LineTerminatorSequence :: <CR> is the code unit value 0x000A.
 
 The TRV of LineTerminatorSequence :: <CR><LF> is the sequence consisting of the code unit value 0x000A
+
+
+### 8.2.4 Tagged template literals
+
+The following is a tagged template literal (short: tagged template):
+
+tagFunction`Hello ${firstName} ${lastName}!`
+
+Putting a template literal after an expression triggers a function call, similar to how a parameter list (comma-separated values in parentheses) triggers a function call. The previous code is equivalent to the following function call (in reality, first parameter is more than just an Array, but that is explained later).
+
+tagFunction(['Hello ', ' ', '!'], firstName, lastName)
+
+Thus, the name before the content in backticks is the name of a function to call, the tag function. The tag function receives two different kinds of data:
+
+* Template strings such as 'Hello '.
+* Substitutions such as firstName (delimited by ${}). A substitution can be any expression.
+
+Template strings are known statically (at compile time), substitutions are only known at runtime. The tag function can do with its parameters as it pleases: It can completely ignore the template strings, return values of any type, etc.
+
+Additionally, tag functions get two versions of each template string:
+
+* A “raw” version in which backslashes are not interpreted (`\n` becomes '\\n', a string of length 2)
+* A “cooked” version in which backslashes are special (`\n` becomes a string with just a newline in it).
+
+That allows String.raw (which is explained later) to do its work:
+
+          > String.raw`\n` === '\\n'
+          true
+
+
+### 8.3 Examples of using tagged template literals
+
+Tagged template literals allow you to implement custom embedded sub-languages (which are sometimes called domain-specific languages) with little effort, because JavaScript does much of the parsing for you. You only have to write a function that receives the results.
+
+Let’s look at examples. Some of them are inspired by the original proposal for template literals, which refers to them via their old name, quasi-literals.
+
+
+### 8.3.1 Raw strings
+
+ES6 includes the tag function String.raw for raw strings, where backslashes have no special meaning:
+
+        const str = String.raw`This is a text
+        with multiple lines.
+        Escapes are not interpreted,
+        \n is not a newline.`;
+
+This is useful whenever you need to create strings that have backslashes in them. For example:
+
+        function createNumberRegExp(english) {
+            const PERIOD = english ? String.raw`\.` : ','; // (A)
+            return new RegExp(`[0-9]+(${PERIOD}[0-9]+)?`);
+        }
+
+In line A, String.raw enables us to write the backslash as we would in a regular expression literal. With normal string literals, we have to escape twice: First, we need to escape the dot for the regular expression. Second, we need to escape the backslash for the string literal.
+
+### 8.3.2 Shell commands
+
+        const proc = sh`ps ax | grep ${pid}`;
+        (Source: David Herman)
+
+### 8.3.3 Byte strings
+
+        const buffer = bytes`455336465457210a`;
+        (Source: David Herman)
+
+### 8.3.4 HTTP requests
+
+        POST`http://foo.org/bar?a=${a}&b=${b}
+             Content-Type: application/json
+             X-Credentials: ${credentials}
+
+             { "foo": ${foo},
+               "bar": ${bar}}
+             `
+             (myOnReadyStateChangeHandler);
+        (Source: Luke Hoban)
+
+### 8.3.5 More powerful regular expressions
+
+Steven Levithan has given [an example](https://gist.github.com/4222600) of how tagged template literals could be used for his regular expression library [XRegExp](http://xregexp.com/).
+
+XRegExp is highly recommended if you are working with regular expressions. You get many advanced features, but there is only a small performance penalty – once at creation time – because XRegExp compiles its input to native regular expressions.
+
+Without tagged templates, you write code such as the following:
+
+          var parts = '/2015/10/Page.html'.match(XRegExp(
+            '^ # match at start of string only \n' +
+            '/ (?<year> [^/]+ ) # capture top dir name as year \n' +
+            '/ (?<month> [^/]+ ) # capture subdir name as month \n' +
+            '/ (?<title> [^/]+ ) # capture base name as title \n' +
+            '\\.html? $ # .htm or .html file ext at end of path ', 'x'
+          ));
+
+          console.log(parts.year); // 2015
+
+We can see that XRegExp gives us named groups (year, month, title) and the x flag. With that flag, most whitespace is ignored and comments can be inserted.
+
+There are two reasons that string literals don’t work well here. First, we have to type every regular expression backslash twice, to escape it for the string literal. Second, it is cumbersome to enter multiple lines.
+
+Instead of adding strings, you can also continue a string literal in the next line if you end the current line with a backslash. But that still involves much visual clutter, especially because you still need the explicit newline via \n at the end of each line.
