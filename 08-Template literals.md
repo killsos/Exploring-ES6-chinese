@@ -137,4 +137,13 @@ All of these line terminators are normalized to LF in template literals. That is
           AFTER`;
           console.log(str === 'BEFORE\nAFTER'); // true
 
-<img src="./leanpub_gears.png" width="100" >
+<img src="./leanpub_gears.png" width="60" >
+Spec: line terminators in template literals
+
+In the ECMAScript specification, Sect. “Static Semantics: TV and TRV” defines how line terminators are to be interpreted in template literals:
+
+The TRV of LineTerminatorSequence :: <LF> is the code unit value 0x000A.
+
+The TRV of LineTerminatorSequence :: <CR> is the code unit value 0x000A.
+
+The TRV of LineTerminatorSequence :: <CR><LF> is the sequence consisting of the code unit value 0x000A
