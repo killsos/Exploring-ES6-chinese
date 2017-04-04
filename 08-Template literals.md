@@ -376,4 +376,160 @@ This is the data that the queries operates on:
 
 This data is wrapped in an instance of GraphQLSchema, where it gets the name Store (as mentioned in fragment on Store).
 
-### 8.3.9 Text localization (L10N) 
+### 8.3.9 Text localization (L10N)
+
+This section describes a simple approach to text localization that supports different languages and different locales (how to format numbers, time, etc.). Given the following message.
+
+          alert(msg`Welcome to ${siteName}, you are visitor
+                    number ${visitorNumber}:d!`);
+
+The tag function msg would work as follows.
+
+First, The literal parts are concatenated to form a string that can be used to look up a translation in a table. The lookup string for the previous example is:
+
+      'Welcome to {0}, you are visitor number {1}!'
+
+This lookup string could, for example, be mapped to a German translation::
+
+      'Besucher Nr. {1}, willkommen bei {0}!'
+
+The English “translation” would be the same as the lookup string.
+
+Second, the result from the lookup is used to display the substitutions. Because a lookup result includes indices, it can rearrange the order of the substitutions. That has been done in German, where the visitor number comes before the site name. How the substitutions are formatted can be influenced via annotations such as :d. This annotation means that a locale-specific decimal separator should be used for visitorNumber. Thus, a possible English result is:
+
+Welcome to ACME Corp., you are visitor number 1,300!
+In German, we have results such as:
+
+Besucher Nr. 1.300, willkommen bei ACME Corp.!
+
+### 8.3.10 Text templating via untagged template literals
+
+Let’s say we want to create HTML that displays the following data in a table:
+
+        const data = [
+            { first: '<Jane>', last: 'Bond' },
+            { first: 'Lars', last: '<Croft>' },
+        ];
+
+As explained previously, template literals are not templates:
+
+* A template literal is code that is executed immediately.
+* A template is text with holes that you can fill with data.
+
+A template is basically a function: data in, text out. And that description gives us a clue how we can turn a template literal into an actual template. Let’s implement a template tmpl as a function that maps an Array addrs to a string:
+
+        const tmpl = addrs => `
+            <table>
+            ${addrs.map(addr => `
+                <tr><td>${addr.first}</td></tr>
+                <tr><td>${addr.last}</td></tr>
+            `).join('')}
+            </table>
+        `;
+        console.log(tmpl(data));
+        // Output:
+        // <table>
+        //
+        //     <tr><td><Jane></td></tr>
+        //     <tr><td>Bond</td></tr>
+        //
+        //     <tr><td>Lars</td></tr>
+        //     <tr><td><Croft></td></tr>
+        //
+        // </table>
+
+The outer template literal provides the bracketing <table> and </table>. Inside, we are embedding JavaScript code that produces a string by joining an Array of strings. The Array is created by mapping each address to two table rows. Note that the plain text pieces <Jane> and <Croft> are not properly escaped. How to do that via a tagged template is explained in the next section.
+
+### 8.3.10.1 Should I use this technique in production code?
+
+This is a useful quick solution for smaller templating tasks. For larger tasks, you may want more powerful solutions such as the templating engine [Handlebars.js](http://handlebarsjs.com/) or the JSX syntax used in React.
+
+Acknowledgement: This approach to text templating is based on [an idea](https://mail.mozilla.org/pipermail/es-discuss/2012-August/024328.html) by Claus Reinke.
+
+### 8.3.11 A tag function for HTML templating
+
+Compared to using untagged templates for HTML templating, like we did in the previous section, tagged templates bring two advantages:
+
+* They can escape characters for us if we prefix ${} with an exclamation mark. That is needed for the names, which contain characters that need to be escaped (<Jane>).
+
+* They can automatically join() Arrays for us, so that we don’t have to call that method ourselves.
+
+
+Then the code for the template looks as follows. The name of the tag function is html:
+
+
+        const tmpl = addrs => html`
+            <table>
+            ${addrs.map(addr => html`
+                <tr><td>!${addr.first}</td></tr>
+                <tr><td>!${addr.last}</td></tr>
+            `)}
+            </table>
+        `;
+        const data = [
+            { first: '<Jane>', last: 'Bond' },
+            { first: 'Lars', last: '<Croft>' },
+        ];
+        console.log(tmpl(data));
+        // Output:
+        // <table>
+        //
+        //     <tr><td>&lt;Jane&gt;</td></tr>
+        //     <tr><td>Bond</td></tr>
+        //
+        //     <tr><td>Lars</td></tr>
+        //     <tr><td>&lt;Croft&gt;</td></tr>
+        //
+        // </table>
+
+
+Note that the angle brackets around Jane and Croft are escaped, whereas those around tr and td aren’t.
+
+If you prefix a substitution with an exclamation mark (!${addr.first}) then it will be HTML-escaped. The tag function checks the text preceding a substitution in order to determine whether to escape or not.
+
+An implementation of html [is shown later.](http://exploringjs.com/es6/ch_template-literals.html#sec_html-tag-function-implementation)
+
+
+### 8.4 Implementing tag functions
+
+The following is a tagged template literal:
+
+tagFunction`lit1\n${subst1} lit2 ${subst2}`
+This literal triggers (roughly) the following function call:
+
+tagFunction(['lit1\n',  ' lit2 ', ''], subst1, subst2)
+The exact function call looks more like this:
+
+// Globally: add template object to per-realm template map
+
+        {
+            // “Cooked” template strings: backslash is interpreted
+            const templateObject = ['lit1\n',  ' lit2 ', ''];
+            // “Raw” template strings: backslash is verbatim
+            templateObject.raw   = ['lit1\\n', ' lit2 ', ''];
+
+            // The Arrays with template strings are frozen
+            Object.freeze(templateObject.raw);
+            Object.freeze(templateObject);
+
+            __templateMap__[716] = templateObject;
+        }
+
+        // In-place: invocation of tag function
+
+tagFunction(__templateMap__[716], subst1, subst2)
+
+There are two kinds of input that the tag function receives:
+
+* Template strings (first parameter): the static parts of tagged templates that don’t change (e.g. ' lit2 '). A template object stores two versions of the template strings:
+
+  * Cooked: with escapes such as \n interpreted. Stored in templateObject[0] etc.
+  * Raw: with uninterpreted escapes. Stored in templateObject.raw[0] etc.
+
+* Substitutions (remaining parameters): the values that are embedded inside template literals via ${} (e.g. subst1). Substitutions are dynamic, they can change with each invocation.
+
+The idea behind a global template object is that the same tagged template might be executed multiple times (e.g. in a loop or a function). The template object enables the tag function to cache data from previous invocations: It can put data it derived from input kind #1 (template strings) into the object, to avoid recomputing it. Caching happens per realm (think frame in a browser). That is, there is one template object per call site and realm.
+
+**Tagged template literals in the spec**
+
+[A section on tagged template](http://www.ecma-international.org/ecma-262/6.0/#sec-tagged-templates)literals explains how they are interpreted as function calls. A [separate section](http://www.ecma-international.org/ecma-262/6.0/#sec-template-literals-runtime-semantics-argumentlistevaluation) explains how a template literal is turned into a list of arguments: the template object and the substitutions.
