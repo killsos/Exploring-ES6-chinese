@@ -344,3 +344,109 @@ This option only works in global scope (and therefore not inside ES6 modules).
       if (!('someGlobal' in window)) {
           window.someGlobal = { ··· };
       }
+
+### 9.4.5 Why is there a temporal dead zone?
+
+*There are several reasons why const and let have temporal dead zones:
+
+* To catch programming errors: Being able to access a variable before its declaration is strange. If you do so, it is normally by accident and you should be warned about it.
+
+* For const: Making const work properly is difficult. [Quoting Allen Wirfs-Brock: “TDZs … ](https://mail.mozilla.org/pipermail/es-discuss/2012-September/024996.html)provide a rational semantics for const. There was significant technical discussion of that topic and TDZs emerged as the best solution.” let also has a temporal dead zone so that switching between let and const doesn’t change behavior in unexpected ways.
+
+* Future-proofing for guards: JavaScript may eventually have guards, a mechanism for enforcing at runtime that a variable has the correct value (think runtime type check). If the value of a variable is undefined before its declaration then that value may be in conflict with the guarantee given by its guard.
+
+### 9.4.6 Further reading
+
+Sources of this section:
+
+* [“Performance concern with let/const”](https://esdiscuss.org/topic/performance-concern-with-let-const)
+* [“Bug 3009 – typeof on TDZ variable”](https://bugs.ecmascript.org/show_bug.cgi?id=3009)
+
+### 9.5 let and const in loop heads
+
+The following loops allow you to declare variables in their heads:
+
+* for
+* for-in
+* for-of
+
+To make a declaration, you can use either var, let or const. Each of them has a different effect, as I’ll explain next.
+
+### 9.5.1 for loop
+
+var-declaring a variable in the head of a for loop creates a single binding (storage space) for that variable:
+
+        const arr = [];
+        for (var i=0; i < 3; i++) {
+            arr.push(() => i);
+        }
+        arr.map(x => x()); // [3,3,3]
+
+Every i in the bodies of the three arrow functions refers to the same binding, which is why they all return the same value.
+
+所有循环中var声明只有一个存储空间
+
+If you let-declare a variable, a new binding is created for each loop iteration:
+
+用let声明变量 每一个循环一次就生成一个新绑定 一个新空间
+
+        const arr = [];
+        for (let i=0; i < 3; i++) {
+            arr.push(() => i);
+        }
+        arr.map(x => x()); // [0,1,2]
+
+
+This time, each i refers to the binding of one specific iteration and preserves the value that was current at that time. Therefore, each arrow function returns a different value.
+
+const works like var, but you can’t change the initial value of a const-declared variable:
+
+const与var类似 但const不能改变初始值
+
+        // TypeError: Assignment to constant variable
+        // (due to i++)
+        for (const i=0; i<3; i++) {
+            console.log(i);
+        }
+
+Getting a fresh binding for each iteration may seem strange at first, but it is very useful whenever you use loops to create functions that refer to loop variables, as explained in a later section.
+
+**for loop: per-iteration bindings in the spec **
+[The evaluation of the for loop](http://www.ecma-international.org/ecma-262/6.0/#sec-for-statement-runtime-semantics-labelledevaluation) handles var as the second case and let/const as the third case. Only let-declared variables are added to the list perIterationLets (step 9), which is passed to [ForBodyEvaluation()](http://www.ecma-international.org/ecma-262/6.0/#sec-forbodyevaluation) as the second-to-last parameter, perIterationBindings.
+
+
+### 9.5.2 for-of loop and for-in loop
+
+In a for-of loop, var creates a single binding:
+
+在for-of循环中 var也创建单个绑定
+
+        const arr = [];
+        for (var i of [0, 1, 2]) {
+            arr.push(() => i);
+        }
+        arr.map(x => x()); // [2,2,2]
+
+const creates one immutable binding per iteration:
+
+const也创建一个可变绑定在每一次迭代
+
+        const arr = [];
+        for (const i of [0, 1, 2]) {
+            arr.push(() => i);
+        }
+        arr.map(x => x()); // [0,1,2]
+
+let also creates one binding per iteration, but the bindings it creates are mutable.
+
+而let创建单个绑定每次迭代中 但是这个绑定是不可变
+
+The for-in loop works similarly to the for-of loop.
+
+for-in与for-of循环相似
+
+
+总结
+for循环中 var const 只创建一个存储空间  const的值不能改变 let每次迭代中都创建一个新存储空间
+
+for-of for-in循环中 var 创建单个绑定  let const每次迭代创建一个新的存储空间 const的绑定不可改变的 let是可变的
