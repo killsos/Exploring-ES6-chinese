@@ -246,3 +246,134 @@ We can see that XRegExp gives us named groups (year, month, title) and the x fla
 There are two reasons that string literals don’t work well here. First, we have to type every regular expression backslash twice, to escape it for the string literal. Second, it is cumbersome to enter multiple lines.
 
 Instead of adding strings, you can also continue a string literal in the next line if you end the current line with a backslash. But that still involves much visual clutter, especially because you still need the explicit newline via \n at the end of each line.
+
+        var parts = '/2015/10/Page.html'.match(XRegExp(
+          '^ # match at start of string only \n\
+          / (?<year> [^/]+ ) # capture top dir name as year \n\
+          / (?<month> [^/]+ ) # capture subdir name as month \n\
+          / (?<title> [^/]+ ) # capture base name as title \n\
+          \\.html? $ # .htm or .html file ext at end of path ', 'x'
+        ));
+
+Problems with backslashes and multiple lines go away with tagged templates:
+
+        var parts = '/2015/10/Page.html'.match(XRegExp.rx`
+            ^ # match at start of string only
+            / (?<year> [^/]+ ) # capture top dir name as year
+            / (?<month> [^/]+ ) # capture subdir name as month
+            / (?<title> [^/]+ ) # capture base name as title
+            \.html? $ # .htm or .html file ext at end of path
+        `);
+
+
+Additionally, tagged templates let you insert values v via ${v}. I’d expect a regular expression library to escape strings and to insert regular expressions verbatim. For example:
+
+          var str   = 'really?';
+          var regex = XRegExp.rx`(${str})*`;
+          This would be equivalent to
+
+          var regex = XRegExp.rx`(really\?)*`;
+
+
+### 8.3.6 Query languages
+
+Example:
+
+          $`a.${className}[href*='//${domain}/']`
+
+This is a DOM query that looks for all <a> tags whose CSS class is className and whose target is a URL with the given domain. The tag function $ ensures that the arguments are correctly escaped, making this approach safer than manual string concatenation.
+
+
+### 8.3.7 React JSX via tagged templates
+
+Facebook React is “a JavaScript library for building user interfaces”. It has the optional language extension JSX that enables you to build virtual DOM trees for user interfaces. This extension makes your code more concise, but it is also non-standard and breaks compatibility with the rest of the JavaScript ecosystem.
+
+The library t7.js provides an alternative to JSX and uses templates tagged with t7:
+
+        t7.module(function(t7) {
+          function MyWidget(props) {
+            return t7`
+              <div>
+                <span>I'm a widget ${ props.welcome }</span>
+              </div>
+            `;
+          }
+
+          t7.assign('Widget', MyWidget);
+
+          t7`
+            <div>
+              <header>
+                <Widget welcome="Hello world" />
+              </header>
+            </div>
+          `;
+        });
+
+
+In “Why not Template Literals?”, the React team explains why they opted not to use template literals. One challenge is accessing components inside tagged templates. For example, MyWidget is accessed from the second tagged template in the previous example. One verbose way of doing so would be:
+
+        <${MyWidget} welcome="Hello world" />
+
+Instead, t7.js uses a registry which is filled via t7.assign(). That requires extra configuration, but the template literals look nicer; especially if there is both an opening and a closing tag.
+
+### 8.3.8 Facebook GraphQL
+
+Facebook Relay is a “JavaScript framework for building data-driven React applications”. One of its parts is the query language GraphQL whose queries can be created via templates tagged with Relay.QL. For example (borrowed from the Relay homepage):
+
+        class Tea extends React.Component {
+          render() {
+            var {name, steepingTime} = this.props.tea;
+            return (
+              <li key={name}>
+                {name} (<em>{steepingTime} min</em>)
+              </li>
+            );
+          }
+        }
+        Tea = Relay.createContainer(Tea, {
+          fragments: { // (A)
+            tea: () => Relay.QL`
+              fragment on Tea {
+                name,
+                steepingTime,
+              }
+            `,
+          },
+        });
+
+        class TeaStore extends React.Component {
+          render() {
+            return <ul>
+              {this.props.store.teas.map(
+                tea => <Tea tea={tea} />
+              )}
+            </ul>;
+          }
+        }
+        TeaStore = Relay.createContainer(TeaStore, {
+          fragments: { // (B)
+            store: () => Relay.QL`
+              fragment on Store {
+                teas { ${Tea.getFragment('tea')} },
+              }
+            `,
+          },
+        });
+
+
+The objects starting in line A and line B define fragments, which are defined via callbacks that return queries. The result of fragment tea is put into this.props.tea. The result of fragment store is put into this.props.store.
+
+This is the data that the queries operates on:
+
+        const STORE = {
+          teas: [
+            {name: 'Earl Grey Blue Star', steepingTime: 5},
+            ···
+          ],
+        };
+
+
+This data is wrapped in an instance of GraphQLSchema, where it gets the name Store (as mentioned in fragment on Store).
+
+### 8.3.9 Text localization (L10N) 
