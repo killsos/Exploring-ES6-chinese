@@ -257,7 +257,90 @@ var声明变量没有TDZ 它们周期有下面步骤:
 
 Variables declared via let have temporal dead zones and their life cycle looks like this:
 
-When the scope (its surrounding block) of a let variable is entered, storage space (a binding) is created for it. The variable remains uninitialized.
-Getting or setting an uninitialized variable causes a ReferenceError.
-When the execution within the scope reaches the declaration, the variable is set to the value specified by the initializer (an assignment) – if there is one. If there isn’t then the value of the variable is set to undefined.
+let声明的变量有TDZ 变量生命周期如下:
+
+* When the scope (its surrounding block) of a let variable is entered, storage space (a binding) is created for it. The variable remains uninitialized.
+
+* 当变量作用域 一个存储空间被创建 但是不会初始化
+
+* Getting or setting an uninitialized variable causes a ReferenceError.
+
+* 这个时候任何设置或获取的动作都会引起TypeError
+
+* When the execution within the scope reaches the declaration, the variable is set to the value specified by the initializer (an assignment) – if there is one. If there isn’t then the value of the variable is set to undefined.
+
+* 声明的语句被执行 这时候就完成初始化无论有没有具体值  如果没有值也是undefinded
+
 const variables work similarly to let variables, but they must have an initializer (i.e., be set to a value immediately) and can’t be changed.
+
+const声明和let类似 区别在于const必须用值进行初始化 并且不能改变
+
+### 9.4.3 Examples
+
+Within a TDZ, an exception is thrown if a variable is got or set:
+
+在TDZ区域 会引起ReferenceError
+
+        let tmp = true;
+        if (true) { // enter new scope, TDZ starts
+            // Uninitialized binding for `tmp` is created
+            console.log(tmp); // ReferenceError
+
+            let tmp; // TDZ ends, `tmp` is initialized with `undefined`
+            console.log(tmp); // undefined
+
+            tmp = 123;
+            console.log(tmp); // 123
+        }
+        console.log(tmp); // true
+
+If there is an initializer then the TDZ ends after the initializer was evaluated and the result was assigned to the variable:
+
+        let foo = console.log(foo); // ReferenceError
+
+The following code demonstrates that the dead zone is really temporal (based on time) and not spatial (based on location):
+
+        if (true) { // enter new scope, TDZ starts
+            const func = function () {
+                console.log(myVar); // OK!
+            };
+
+            // Here we are within the TDZ and
+            // accessing `myVar` would cause a `ReferenceError`
+
+            let myVar = 3; // TDZ ends
+            func(); // called outside TDZ
+        }
+
+### 9.4.4 typeof throws a ReferenceError for a variable in the TDZ
+
+If you access a variable in the temporal dead zone via typeof, you get an exception:
+
+        if (true) {
+            console.log(typeof foo); // ReferenceError (TDZ)
+            console.log(typeof aVariableThatDoesntExist); // 'undefined'
+            let foo;
+        }
+
+Why? The rationale is as follows: foo is not undeclared, it is uninitialized. You should be aware of its existence, but aren’t. Therefore, being warned seems desirable.
+
+Furthermore, this kind of check is only useful for conditionally creating global variables. That is something that you don’t need to do in normal programs.
+
+
+### 9.4.4.1 Conditionally creating variables
+
+When it comes to conditionally creating variables, you have two options.
+
+* Option 1 – typeof and var:
+
+        if (typeof someGlobal === 'undefined') {
+            var someGlobal = { ··· };
+        }
+
+This option only works in global scope (and therefore not inside ES6 modules).
+
+* Option 2 – window:
+
+      if (!('someGlobal' in window)) {
+          window.someGlobal = { ··· };
+      }
