@@ -228,6 +228,36 @@ For example, via a loop:
 
 There are two const declarations in this code, in line A and in line B. And during each loop iteration, their constants have different values.
 
-### 9.4 The temporal dead zone 
+### 9.4 The temporal dead zone
 
 A variable declared by let or const has a so-called temporal dead zone (TDZ): When entering its scope, it can’t be accessed (got or set) until execution reaches the declaration. Let’s compare the life cycles of var-declared variables (which don’t have TDZs) and let-declared variables (which have TDZs).
+
+用let const声明的变量有一个被叫temporal dead zone (TDZ) 当进入变量的作用域 一直到这个变量的声明被执行 才能对变量进行set get的操作
+
+var 没有 temporal dead zone (TDZ) let 有temporal dead zone (TDZ)
+
+### 9.4.1 The life cycle of var-declared variables
+### var声明变量生命周期
+
+var variables don’t have temporal dead zones. Their life cycle comprises the following steps:
+
+var声明变量没有TDZ 它们周期有下面步骤:
+
+* When the scope (its surrounding function) of a var variable is entered, storage space (a binding) is created for it. The variable is immediately initialized, by setting it to undefined.
+
+* 当进入函数作用域 一个存储空间被创建 这个变量立即被初始化用undefined
+
+* When the execution within the scope reaches the declaration, the variable is set to the value specified by the initializer (an assignment) – if there is one. If there isn’t, the value of the variable remains undefined.
+
+* 当声明语句被执行的首 变量被赋予新值 如果没有新值依然是undefined
+
+
+### 9.4.2 The life cycle of let-declared variables
+### let声明变量声明周期
+
+Variables declared via let have temporal dead zones and their life cycle looks like this:
+
+When the scope (its surrounding block) of a let variable is entered, storage space (a binding) is created for it. The variable remains uninitialized.
+Getting or setting an uninitialized variable causes a ReferenceError.
+When the execution within the scope reaches the declaration, the variable is set to the value specified by the initializer (an assignment) – if there is one. If there isn’t then the value of the variable is set to undefined.
+const variables work similarly to let variables, but they must have an initializer (i.e., be set to a value immediately) and can’t be changed.
