@@ -450,3 +450,137 @@ for-in与for-of循环相似
 for循环中 var const 只创建一个存储空间  const的值不能改变 let每次迭代中都创建一个新存储空间
 
 for-of for-in循环中 var 创建单个绑定  let const每次迭代创建一个新的存储空间 const的绑定不可改变的 let是可变的
+
+
+### 9.5.3 Why are per-iteration bindings useful?
+
+The following is an HTML page that displays three links:
+
+* If you click on “yes”, it is translated to “ja”.
+* If you click on “no”, it is translated to “nein”.
+* If you click on “perhaps”, it is translated to “vielleicht”.
+
+        <!doctype html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+        </head>
+        <body>
+            <div id="content"></div>
+            <script>
+                const entries = [
+                    ['yes', 'ja'],
+                    ['no', 'nein'],
+                    ['perhaps', 'vielleicht'],
+                ];
+                const content = document.getElementById('content');
+                for (const [source, target] of entries) { // (A)
+                    content.insertAdjacentHTML('beforeend',
+                        `<div><a id="${source}" href="">${source}</a></div>`);
+                    document.getElementById(source).addEventListener(
+                        'click', (event) => {
+                            event.preventDefault();
+                            alert(target); // (B)
+                        });
+                }
+            </script>
+        </body>
+        </html>
+
+What is displayed depends on the variable target (line B). If we had used var instead of const in line A, there would be a single binding for the whole loop and target would have the value 'vielleicht', afterwards. Therefore, no matter what link you click on, you would always get the translation 'vielleicht'.
+
+Thankfully, with const, we get one binding per loop iteration and the translations are displayed correctly.
+
+### 9.6 Parameters as variables
+### 参数和变量
+
+### 9.6.1 Parameters versus local variables
+### 参数与本地变量
+
+If you let-declare a variable that has the same name as a parameter, you get a static (load-time) error:
+
+不用let声明一个本地变量与参数同名 会报错
+
+        function func(arg) {
+            let arg; // static error: duplicate declaration of `arg`
+        }
+
+Doing the same inside a block shadows the parameter:
+
+
+        function func(arg) {
+            {
+                let arg; // shadows parameter `arg`
+            }
+        }
+
+In contrast, var-declaring a variable that has the same name as a parameter does nothing, just like re-declaring a var variable within the same scope does nothing.
+
+用var声明一个变量与参数相同
+
+        function func(arg) {
+            var arg; // does nothing
+        }
+        function func(arg) {
+            {
+                // We are still in same `var` scope as `arg`
+                var arg; // does nothing
+            }
+        }
+
+### 9.6.2 Parameter default values and the temporal dead zone
+### 参数默认值和TDZ
+
+If parameters have default values, they are treated like a sequence of let statements and are subject to temporal dead zones:
+
+如果参数有默认值 他们被认为执行一些语句 并且遵循TDZ
+
+
+        // OK: `y` accesses `x` after it has been declared
+
+        function foo(x=1, y=x) {
+            return [x, y];
+        }
+        foo(); // [1,1]
+
+        // Exception: `x` tries to access `y` within TDZ
+
+        function bar(x=y, y=2) {
+            return [x, y];
+        }
+        bar(); // ReferenceError
+
+
+### 9.6.3 Parameter default values don’t see the scope of the body
+### 参数默认值不进入函数作用域
+
+The scope of parameter default values is separate from the scope of the body (the former surrounds the latter). That means that methods or functions defined “inside” parameter default values don’t see the local variables of the body:
+
+参数默认值的作用域与函数本身作用域是分开的 参数默认值的作用域不能进入函数本身作用域
+
+        const foo = 'outer';
+
+        function bar(func = x => foo) {
+            const foo = 'inner';
+            console.log(func()); // outer
+        }
+
+        bar();
+
+### 9.7 The global object
+
+JavaScript’s global object (window in web browsers, global in Node.js) is more a bug than a feature, especially with regard to performance. That’s why it makes sense that ES6 introduces a distinction:
+
+* All properties of the global object are global variables. In global scope, the following declarations create such properties:
+  * var declarations
+  * Function declarations
+
+* But there are now also global variables that are not properties of the global object. In global scope, the following declarations create such variables:
+
+  * let declarations
+  * const declarations
+  * Class declarations
+
+Note that the bodies of modules are not executed in global scope, only scripts are. Therefore, the environments for various variables form the following chain.
+
+![http://exploringjs.com/es6/images/variables----environment_chain_150dpi.png](./variables----environment_chain_150dpi.png)
