@@ -653,3 +653,54 @@ Classes not being hoisted may be surprising, because, under the hood, they creat
     class MyClass extends identity(Object) {
     }
 }
+
+### 9.9 Coding style: const versus let versus var
+
+I recommend to always use either let or const:
+
+我推荐用let或const
+
+* Prefer const. You can use it whenever a variable never changes its value. In other words: the variable should never be the left-hand side of an assignment or the operand of ++ or --. Changing an object that a const variable refers to is allowed:
+
+const声明变量永远不要左侧++/-- 但是可以改变对象的引用
+
+         const foo = {};
+         foo.prop = 123; // OK
+
+* You can even use const in a for-of loop, because one (immutable) binding is created per loop iteration:
+
+const可以用于for-of循环 每次循环迭代都创建一个不改变的绑定
+
+         for (const x of ['a', 'b']) {
+             console.log(x);
+         }
+         // Output:
+         // a
+         // b
+
+
+Inside the body of the for-of loop, x can’t be changed.
+
+用const声明变量在for-of循环内部 变量不可改变
+
+* Otherwise, use let – when the initial value of a variable changes later on.
+
+         let counter = 0; // initial value
+         counter++; // change
+
+         let obj = {}; // initial value
+         obj = { foo: 123 }; // change
+
+* Avoid var.
+
+If you follow these rules, var will only appear in legacy code, as a signal that careful refactoring is required.
+
+var does one thing that let and const don’t: variables declared via it become properties of the global object. However, that’s generally not a good thing. You can achieve the same effect by assigning to window (in browsers) or global (in Node.js).
+
+### 9.9.1 An alternative approach
+
+An alternative to the just mentioned style rules is to use const only for things that are completely immutable (primitive values and frozen objects). Then we have two approaches:
+
+  1. Prefer const: const marks immutable bindings.
+  2. Prefer let: const marks immutable values.
+I lean slightly in favor of #1, but #2 is fine, too.
