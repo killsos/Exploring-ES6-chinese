@@ -123,6 +123,8 @@ In Array literals, the spread operator turns iterable values into Array elements
 
 The ES6 way of handling parameters is equivalent to destructuring the actual parameters via the formal parameters. That is, the following function call:
 
+实参与形参:
+
         function func(«FORMAL_PARAMETERS») {
             «CODE»
         }
@@ -142,6 +144,7 @@ Example – the following function call:
         function logSum(x=0, y=0) {
             console.log(x + y);
         }
+
         logSum(7, 8);
 
 becomes:
@@ -154,3 +157,104 @@ becomes:
         }
 
 Let’s look at specific features next.
+
+### 11.3 Parameter default values
+
+ECMAScript 6 lets you specify default values for parameters:
+
+function f(x, y=0) {
+  return [x, y];
+}
+
+Omitting the second parameter triggers the default value:
+
+        > f(1)
+        [1, 0]
+        > f()
+        [undefined, 0]
+
+
+Watch out – undefined triggers the default value, too:
+
+        > f(undefined, undefined)
+        [undefined, 0]
+
+The default value is computed on demand, only when it is actually needed:
+
+        > const log = console.log.bind(console);
+        > function g(x=log('x'), y=log('y')) {return 'DONE'}
+        > g()
+        x
+        y
+        'DONE'
+        > g(1)
+        y
+        'DONE'
+        > g(1, 2)
+        'DONE'
+
+### 11.3.1 Why does undefined trigger default values?
+
+It isn’t immediately obvious why undefined should be interpreted as a missing parameter or a missing part of an object or Array. The rationale for doing so is that it enables you to delegate the definition of default values. Let’s look at two examples.
+
+In the first example ([source: Rick Waldron’s TC39 meeting notes from 2012-07-24](https://github.com/rwaldron/tc39-notes/blob/master/es6/2012-07/july-24.md#413-destructuring-issues)), we don’t have to define a default value in setOptions(), we can delegate that task to setLevel().
+
+        function setLevel(newLevel = 0) {
+            light.intensity = newLevel;
+        }
+        function setOptions(options) {
+            // Missing prop returns undefined => use default
+            setLevel(options.dimmerLevel);
+            setMotorSpeed(options.speed);
+            ···
+        }
+        setOptions({speed:5});
+
+
+In the second example, square() doesn’t have to define a default for x, it can delegate that task to multiply():
+
+        function multiply(x=1, y=1) {
+            return x * y;
+        }
+        function square(x) {
+            return multiply(x, x);
+        }
+
+Default values further entrench the role of undefined as indicating that something doesn’t exist, versus null indicating emptiness.
+
+### 11.3.2 Referring to other parameters in default values
+
+Within a parameter default value, you can refer to any variable, including other parameters:
+
+        function foo(x=3, y=x) {}
+        foo();     // x=3; y=3
+        foo(7);    // x=7; y=7
+        foo(7, 2); // x=7; y=2
+
+However, order matters. Parameters are declared from left to right. “Inside” a default value, you get a ReferenceError if you access a parameter that hasn’t been declared, yet:
+
+        function bar(x=y, y=4) {}
+        bar(3); // OK
+        bar(); // ReferenceError: y is not defined
+
+### 11.3.3 Referring to “inner” variables in default values
+
+Default values exist in their own scope, which is between the “outer” scope surrounding the function and the “inner” scope of the function body. Therefore, you can’t access “inner” variables from the default values:
+
+        const x = 'outer';
+        function foo(a = x) {
+            const x = 'inner';
+            console.log(a); // outer
+        }
+
+If there were no outer x in the previous example, the default value x would produce a ReferenceError (if triggered).
+
+This restriction is probably most surprising if default values are closures:
+
+        const QUX = 2;
+
+        function bar(callback = () => QUX) { // returns 2
+            const QUX = 3;
+            callback();
+        }
+        bar(); // ReferenceError
