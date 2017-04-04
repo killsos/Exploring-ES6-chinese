@@ -208,7 +208,11 @@ But the object obj.foo is not.
 
 ### 9.3.2 const in loop bodies
 
-Once a const variable has been created, it can’t be changed. But that doesn’t mean that you can’t re-enter its scope and start fresh, with a new value. For example, via a loop:
+Once a const variable has been created, it can’t be changed. But that doesn’t mean that you can’t re-enter its scope and start fresh, with a new value.
+
+一旦const变量已经被创建 是不能被改变 但是并不意味着 你不可以再进入它的作用域和用一个新值重新刷新
+
+For example, via a loop:
 
         function logArgs(...args) {
             for (const [index, elem] of args.entries()) { // (A)
@@ -223,3 +227,7 @@ Once a const variable has been created, it can’t be changed. But that doesn’
         // 1. everyone
 
 There are two const declarations in this code, in line A and in line B. And during each loop iteration, their constants have different values.
+
+### 9.4 The temporal dead zone 
+
+A variable declared by let or const has a so-called temporal dead zone (TDZ): When entering its scope, it can’t be accessed (got or set) until execution reaches the declaration. Let’s compare the life cycles of var-declared variables (which don’t have TDZs) and let-declared variables (which have TDZs).
