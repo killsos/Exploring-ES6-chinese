@@ -174,3 +174,49 @@ If you destructure an object, you mention only those properties that you are int
 If you destructure an Array, you can choose to only extract a prefix:
 
         const [x,y] = ['a', 'b', 'c']; // x='a'; y='b';
+
+### 10.4 How do patterns access the innards of values?
+
+In an assignment pattern = someValue, how does the pattern access what’s inside someValue?
+
+### 10.4.1 Object patterns coerce values to objects
+
+The object pattern coerces destructuring sources to objects before accessing properties. That means that it works with primitive values:
+
+        const {length : len} = 'abc'; // len = 3
+        const {toString: s} = 123; // s = Number.prototype.toString
+
+### 10.4.1.1 Failing to object-destructure a value
+
+The coercion to object is not performed via Object(), but via the internal operation ToObject(). The two operations handle undefined and null differently.
+
+Object() converts primitive values to wrapper objects and leaves objects untouched:
+
+        > typeof Object('abc')
+        'object'
+
+        > var obj = {};
+        > Object(obj) === obj
+        true
+
+It also converts undefined and null to empty objects:
+
+        > Object(undefined)
+        {}
+        > Object(null)
+        {}
+
+In contrast, ToObject() throws a TypeError if it encounters undefined or null. Therefore, the following destructurings fail, even before destructuring accesses any properties:
+
+        const { prop: x } = undefined; // TypeError
+        const { prop: y } = null; // TypeError
+
+As a consequence, you can use the empty object pattern {} to check whether a value is coercible to an object. As we have seen, only undefined and null aren’t:
+
+        **({} = [true, false]); // OK, Arrays are coercible to objects**
+        **({} = 'abc'); // OK, strings are coercible to objects**
+
+        ({} = undefined); // TypeError
+        ({} = null); // TypeError
+
+The parentheses around the expressions are necessary because statements must not begin with curly braces in JavaScript
