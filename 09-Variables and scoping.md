@@ -95,3 +95,5 @@ The following table gives an overview of six ways in which variables can be decl
 | function | Complete             | Block         | Yes       |
 | class    | No                   | Block         | No       |
 | import   | Complete             | Module-global | No       |
+
+<img srx="./var-let-const.png" />
