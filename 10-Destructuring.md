@@ -819,3 +819,92 @@ But why would you define the parameters as in the previous code snippet? Why not
           }
 
 To see why move1() is correct, let’s use both functions for two examples. Before we do that, let’s see how the passing of parameters can be explained via matching.
+
+### 10.11.2.1 Background: passing parameters via matching
+
+For function calls, formal parameters (inside function definitions) are matched against actual parameters (inside function calls). As an example, take the following function definition and the following function call.
+
+          function func(a=0, b=0) { ··· }
+          func(1, 2);
+
+The parameters a and b are set up similarly to the following destructuring.
+
+          [a=0, b=0] ← [1, 2]
+
+### 10.11.2.2 Using move2()
+
+Let’s examine how destructuring works for move2().
+
+Example 1. move2() leads to this destructuring:
+
+[{x, y} = { x: 0, y: 0 }] ← []
+
+The single Array element on the left-hand side does not have a match on the right-hand side, which is why {x,y} is matched against the default value and not against data from the right-hand side (rules 3b, 3d):
+
+{x, y} ← { x: 0, y: 0 }
+
+The left-hand side contains property value shorthands, it is an abbreviation for:
+
+{x: x, y: y} ← { x: 0, y: 0 }
+
+This destructuring leads to the following two assignments (rules 2c, 1):
+
+        x = 0;
+        y = 0;
+
+Example 2. Let’s examine the function call move2({z:3}) which leads to the following destructuring:
+
+        [{x, y} = { x: 0, y: 0 }] ← [{z:3}]
+
+There is an Array element at index 0 on the right-hand side. Therefore, the default value is ignored and the next step is (rule 3d):
+
+{x, y} ← { z: 3 }
+
+That leads to both x and y being set to undefined, which is not what we want.
+
+### 10.11.2.3 Using move1()
+
+Let’s try move1().
+
+Example 1: move1()
+
+[{x=0, y=0} = {}] ← []
+
+We don’t have an Array element at index 0 on the right-hand side and use the default value (rule 3d):
+
+{x=0, y=0} ← {}
+
+The left-hand side contains property value shorthands, which means that this destructuring is equivalent to:
+
+{x: x=0, y: y=0} ← {}
+
+Neither property x nor property y have a match on the right-hand side. Therefore, the default values are used and the following destructurings are performed next (rule 2d):
+
+x ← 0
+
+y ← 0
+
+That leads to the following assignments (rule 1):
+
+x = 0
+
+y = 0
+
+
+Example 2: move1({z:3})
+
+[{x=0, y=0} = {}] ← [{z:3}]
+
+The first element of the Array pattern has a match on the right-hand side and that match is used to continue destructuring (rule 3d):
+
+{x=0, y=0} ← {z:3}
+
+Like in example 1, there are no properties x and y on the right-hand side and the default values are used:
+
+x = 0
+
+y = 0
+
+### 10.11.2.4 Conclusion 
+
+The examples demonstrate that default values are a feature of pattern parts (object properties or Array elements). If a part has no match or is matched against undefined then the default value is used. That is, the pattern is matched against the default value, instead.
