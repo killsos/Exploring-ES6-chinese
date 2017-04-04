@@ -127,7 +127,8 @@ The ES6 way of handling parameters is equivalent to destructuring the actual par
             «CODE»
         }
         func(«ACTUAL_PARAMETERS»);
-        is roughly equivalent to:
+
+is roughly equivalent to:
 
         {
             let [«FORMAL_PARAMETERS»] = [«ACTUAL_PARAMETERS»];
@@ -135,13 +136,15 @@ The ES6 way of handling parameters is equivalent to destructuring the actual par
                 «CODE»
             }
         }
-        Example – the following function call:
+
+Example – the following function call:
 
         function logSum(x=0, y=0) {
             console.log(x + y);
         }
         logSum(7, 8);
-        becomes:
+
+becomes:
 
         {
             let [x=0, y=0] = [7, 8];
@@ -149,4 +152,5 @@ The ES6 way of handling parameters is equivalent to destructuring the actual par
                 console.log(x + y);
             }
         }
-        Let’s look at specific features next.
+
+Let’s look at specific features next.
