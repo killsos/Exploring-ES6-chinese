@@ -4,6 +4,6 @@ function partent(){
   }
 }
 
-console.log(Windows.parent);
+console.log(Windows);
 
-console.log(Windows.son);
+console.log(Window.son);
