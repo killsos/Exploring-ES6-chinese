@@ -533,3 +533,303 @@ The idea behind a global template object is that the same tagged template might 
 **Tagged template literals in the spec**
 
 [A section on tagged template](http://www.ecma-international.org/ecma-262/6.0/#sec-tagged-templates)literals explains how they are interpreted as function calls. A [separate section](http://www.ecma-international.org/ecma-262/6.0/#sec-template-literals-runtime-semantics-argumentlistevaluation) explains how a template literal is turned into a list of arguments: the template object and the substitutions.
+
+### 8.4.1 Number of template strings versus number of substitutions
+
+Let’s use the following tag function to explore how many template strings there are compared to substitutions.
+
+        function tagFunc(templateObject, ...substs) {
+            return { templateObject, substs };
+        }
+
+The number of template strings is always one plus the number of substitutions. In other words: every substitution is always surrounded by two template strings.
+
+templateObject.length === substs.length + 1
+
+If a substitution is first in a literal, it is prefixed by an empty template string:
+
+        > tagFunc`${'subst'}xyz`
+        { templateObject: [ '', 'xyz' ], substs: [ 'subst' ] }
+        If a substitution is last in a literal, it is suffixed by an empty template string:
+
+        > tagFunc`abc${'subst'}`
+        { templateObject: [ 'abc', '' ], substs: [ 'subst' ] }
+        An empty template literal produces one template string and no substitutions:
+
+        > tagFunc``
+        { templateObject: [ '' ], substs: [] }
+
+### 8.4.2 Escaping in tagged template literals: cooked versus raw
+
+Template strings are available in two interpretations – cooked and raw. These interpretations influence escaping:
+
+In both cooked and raw interpretation, a backslash (\) in front of ${ prevents it from being interpreted as starting a substitution.
+
+In both cooked and raw interpretation, backticks are also escaped via backslashes.
+
+However, every single backslash is mentioned in the raw interpretation, even the ones that escape substitutions and backticks.
+
+The tag function describe allows us to explore what that means.
+
+        function describe(tmplObj, ...substs) {
+          return {
+          Cooked: merge(tmplObj, substs),
+          Raw: merge(tmplObj.raw, substs),
+          };
+        }
+
+        function merge(tmplStrs, substs) {
+          // There is always at least one element in tmplStrs
+
+          let result = tmplStrs[0];
+
+          substs.forEach((subst, i) => {
+          result += String(subst);
+          result += tmplStrs[i+1];
+          });
+
+          return result;
+        }
+
+Let’s use this tag function:
+
+        > describe`${3+3}`
+        { Cooked: '6', Raw: '6' }
+
+        > describe`\${3+3}`
+        { Cooked: '${3+3}', Raw: '\\${3+3}' }
+
+        > describe`\\${3+3}`
+        { Cooked: '\\6', Raw: '\\\\6' }
+
+        > describe`\``
+        { Cooked: '`', Raw: '\\`' }
+
+As you can see, whenever the cooked interpretation has a substitution or a backtick then so does the raw interpretation. However, all backslashes from the literal appear in the raw interpretation.
+
+Other occurrences of the backslash are interpreted as follows:
+
+In cooked mode, the backslash is handled like in string literals.
+
+In raw mode, the backslash is used verbatim.
+
+For example:
+
+
+        > describe`\\`
+        { Cooked: '\\', Raw: '\\\\' }
+
+        > describe`\n`
+        { Cooked: '\n', Raw: '\\n' }
+
+        > describe`\u{58}`
+        { Cooked: 'X', Raw: '\\u{58}' }
+
+
+To summarize: The only effect the backslash has in raw mode is that it escapes substitutions and backticks.
+
+** Escaping in tagged template literals in the spec **
+
+In [the grammar for template literals](http://www.ecma-international.org/ecma-262/6.0/#sec-template-literal-lexical-components), you can see that, within a template literal, there must be no open curly brace ({) after a dollar sign ($). However, an escaped dollar sign (\$) can be followed by an open curly brace. The rules for interpreting the characters of a template literal are explained in a [separate section](http://www.ecma-international.org/ecma-262/6.0/#sec-static-semantics-tv-and-trv).
+
+### 8.4.3 Example: String.raw
+
+The following is how you’d implement String.raw:
+
+        function raw(strs, ...substs) {
+            let result = strs.raw[0];
+            for (const [i,subst] of substs.entries()) {
+                result += subst;
+                result += strs.raw[i+1];
+            }
+            return result;
+        }
+
+### 8.4.4 Example: implementing a tag function for HTML templating
+
+I previously demonstrated the tag function html for HTML templating:
+
+        const tmpl = addrs => html`
+            <table>
+            ${addrs.map(addr => html`
+                <tr><td>!${addr.first}</td></tr>
+                <tr><td>!${addr.last}</td></tr>
+            `)}
+            </table>
+        `;
+        const data = [
+            { first: '<Jane>', last: 'Bond' },
+            { first: 'Lars', last: '<Croft>' },
+        ];
+        console.log(tmpl(data));
+        // Output:
+        // <table>
+        //
+        //     <tr><td>&lt;Jane&gt;</td></tr>
+        //     <tr><td>Bond</td></tr>
+        //
+        //     <tr><td>Lars</td></tr>
+        //     <tr><td>&lt;Croft&gt;</td></tr>
+        //
+        // </table>
+
+If you precede a substitution with an exclamation mark (!${addr.first}), it will be HTML-escaped. The tag function checks the text preceding a substitution in order to determine whether to escape or not.
+
+This is an implementation of html:
+
+        function html(templateObject, ...substs) {
+            // Use raw template strings: we don’t want
+            // backslashes (\n etc.) to be interpreted
+            const raw = templateObject.raw;
+
+            let result = '';
+
+            substs.forEach((subst, i) => {
+                // Retrieve the template string preceding
+                // the current substitution
+                let lit = raw[i];
+
+                // In the example, map() returns an Array:
+                // If `subst` is an Array (and not a string),
+                // we turn it into a string
+                if (Array.isArray(subst)) {
+                    subst = subst.join('');
+                }
+
+                // If the substitution is preceded by an exclamation
+                // mark, we escape special characters in it
+                if (lit.endsWith('!')) {
+                    subst = htmlEscape(subst);
+                    lit = lit.slice(0, -1);
+                }
+                result += lit;
+                result += subst;
+            });
+            // Take care of last template string
+            result += raw[raw.length-1]; // (A)
+
+            return result;
+        }
+
+There is always one more template string than substitutions, which is why we need to append the last template string in line A.
+
+The following is a simple implementation of htmlEscape().
+
+        function htmlEscape(str) {
+            return str.replace(/&/g, '&amp;') // first!
+                      .replace(/>/g, '&gt;')
+                      .replace(/</g, '&lt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;')
+                      .replace(/`/g, '&#96;');
+        }
+
+### 8.4.4.1 More ideas
+
+There are more things you can do with this approach to templating:
+
+This approach isn’t limited to HTML, it would work just as well for other kinds of text. Obviously, escaping would have to be adapted.
+
+if-then-else inside the template can be done via the ternary operator (cond?then:else) or via the logical Or operator (||):
+
+          !${addr.first ? addr.first : '(No first name)'}
+          !${addr.first || '(No first name)'}
+
+Dedenting: Some of the leading whitespace in each line can be removed if the first non-whitespace character defines in which column the text starts. For example:
+
+          const theHtml = html`
+              <div>
+                  Hello!
+              </div>`;
+
+The first non-whitespace characters are <div>, which means that the text starts in column 4 (the leftmost column is column 0). The tag function html could automatically remove all preceding columns. Then the previous tagged template would be equivalent to:
+
+          const theHtml =
+          html`<div>
+              Hello!
+          </div>`;
+        You can use destructuring to extract data from parameters of functions:
+          // Without destructuring
+          ${addrs.map((person) => html`
+              <tr><td>!${person.first}</td></tr>
+              <tr><td>!${person.last}</td></tr>
+          `)}
+
+          // With destructuring
+          ${addrs.map(({first,last}) => html`
+              <tr><td>!${first}</td></tr>
+              <tr><td>!${last}</td></tr>
+          `)}
+
+
+### 8.4.5 Example: assembling regular expressions
+
+There are two ways of creating regular expression instances.
+
+* Statically (at compile time), via a regular expression literal: /^abc$/i
+* Dynamically (at runtime), via the RegExp constructor: new RegExp('^abc$', 'i')
+
+If you use the latter, it is because you have to wait until runtime so that all necessary ingredients are available. You are creating the regular expression by concatenating three kinds of pieces:
+
+* Static text
+* Dynamic regular expressions
+* Dynamic text
+
+For #3, special characters (dots, square brackets, etc.) have to be escaped, while #1 and #2 can be used verbatim. A regular expression tag function regex can help with this task:
+
+        const INTEGER = /\d+/;
+        const decimalPoint = '.'; // locale-specific! E.g. ',' in Germany
+        const NUMBER = regex`${INTEGER}(${decimalPoint}${INTEGER})?`;
+        regex looks like this:
+
+        function regex(tmplObj, ...substs) {
+            // Static text: verbatim
+            let regexText = tmplObj.raw[0];
+            for ([i, subst] of substs.entries()) {
+                if (subst instanceof RegExp) {
+                    // Dynamic regular expressions: verbatim
+                    regexText += String(subst);
+                } else {
+                    // Other dynamic data: escaped
+                    regexText += quoteText(String(subst));
+                }
+                // Static text: verbatim
+                regexText += tmplObj.raw[i+1];
+            }
+            return new RegExp(regexText);
+        }
+        function quoteText(text) {
+            return text.replace(/[\\^$.*+?()[\]{}|=!<>:-]/g, '\\$&');
+        }
+
+### 8.5 FAQ: template literals and tagged template literals
+
+### 8.5.1 Where do template literals and tagged template literals come from?
+
+Template literals and tagged template literals were borrowed from the language E, which calls this feature [quasi literals.](http://www.erights.org/elang/grammar/quasi-overview.html)
+
+
+### 8.5.2 What is the difference between macros and tagged template literals?
+
+Macros allow you to implement language constructs that have custom syntax. It’s difficult to provide macros for a programming language whose syntax is as complex as JavaScript’s. Research in this area is ongoing (see Mozilla’s [sweet.js](http://sweetjs.org/)).
+
+While macros are much more powerful for implementing sub-languages than tagged templates, they depend on the tokenization of the language. Therefore, tagged templates are complementary, because they specialize on text content.
+
+### 8.5.3 Can I load a template literal from an external source?
+
+What if I want to load a template literal such as `Hello ${name}!` from an external source (e.g., a file)?
+
+You are abusing template literals if you do so. Given that a template literal can contain arbitrary expressions and is a literal, loading it from somewhere else is similar to loading an expression or a string literal – you have to use eval() or something similar.
+
+### 8.5.4 Why are backticks the delimiters for template literals?
+
+The backtick was one of the few ASCII characters that were still unused in JavaScript. The syntax ${} for interpolation is very common (Unix shells, etc.).
+
+### 8.5.5 Weren’t template literals once called template strings?
+
+The template literal terminology changed relatively late during the creation of the ES6 spec. The following are the old terms:
+
+* Template string (literal): the old name for template literal.
+* Tagged template string (literal): the old name for tagged template literal.
+* Template handler: the old name for tag function.
+* Literal section: the old name for template string (the term substitution remains the same).
