@@ -220,3 +220,67 @@ As a consequence, you can use the empty object pattern {} to check whether a val
         ({} = null); // TypeError
 
 The parentheses around the expressions are necessary because statements must not begin with curly braces in JavaScript
+
+### 10.4.2 Array patterns work with iterables
+
+Array destructuring uses an iterator to get to the elements of a source. Therefore, you can Array-destructure any value that is iterable. Let’s look at examples of iterable values.
+
+Strings are iterable:
+
+        const [x,...y] = 'abc'; // x='a'; y=['b', 'c']
+
+Don’t forget that the iterator over strings returns code points (“Unicode characters”, 21 bits), not code units (“JavaScript characters”, 16 bits). (For more information on Unicode, consult [the chapter “Chapter 24. Unicode and JavaScript”](http://speakingjs.com/es5/ch24.html) in “Speaking JavaScript”.)
+
+For example:
+
+        const [x,y,z] = 'a\uD83D\uDCA9c'; // x='a'; y='\uD83D\uDCA9'; z='c'
+
+You can’t access the elements of a Set via indices, but you can do so via an iterator.
+
+Set不能通过索引获取数据 但是可以通过迭代获取数据
+
+Therefore, Array destructuring works for Sets:
+
+因此 数组的解构和Sets类似
+
+const [x,y] = new Set(['a', 'b']); // x='a'; y='b’;
+
+The Set iterator always returns elements in the order in which they were inserted, which is why the result of the previous destructuring is always the same.
+
+### 10.4.2.1 Failing to Array-destructure a value
+### 数组解构错误
+
+A value is iterable if it has a method whose key is Symbol.iterator that returns an object. Array-destructuring throws a TypeError if the value to be destructured isn’t iterable:
+
+          let x;
+          [x] = [true, false]; // OK, Arrays are iterable
+          [x] = 'abc'; // OK, strings are iterable
+          [x] = { * [Symbol.iterator]() { yield 1 } }; // OK, iterable
+
+          [x] = {}; // TypeError, empty objects are not iterable
+          [x] = undefined; // TypeError, not iterable
+          [x] = null; // TypeError, not iterable
+
+The TypeError is thrown even before accessing elements of the iterable, which means that you can use the empty Array pattern [] to check whether a value is iterable:
+
+可以用一个空数组来检查一个变量是否可迭代
+
+          [] = {}; // TypeError, empty objects are not iterable
+          [] = undefined; // TypeError, not iterable
+          [] = null; // TypeError, not iterable
+
+### 10.5 Default values
+#### 解构的默认值
+
+Default values are an optional feature of patterns. They provide a fallback if nothing is found in the source. If a part (an object property or an Array element) has no match in the source, it is matched against:
+
+* its default value (if specified; it’s optional)
+* undefined (otherwise)
+
+Let’s look at an example. In the following destructuring, the element at index 0 has no match on the right-hand side. Therefore, destructuring continues by matching x against 3, which leads to x being set to 3.
+
+          const [x=3, y] = []; // x = 3; y = undefined
+
+You can also use default values in object patterns:
+
+          const {foo: x=3, bar: y} = {}; // x = 3; y = undefined
