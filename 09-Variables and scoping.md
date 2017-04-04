@@ -88,7 +88,7 @@ Since for-of creates one binding (storage space for a variable) per loop iterati
 The following table gives an overview of six ways in which variables can be declared in ES6 ([inspired by a table by kangax](https://twitter.com/kangax/status/567330097603284992)):
 
 | Header One     | Hoisting 预解析     |Scope 作用域    |Creates global properties 是否是全局属性     |
-| :------------- | :------------- |:------------- |:------------- |
+| :------------- | :------------- |:------------- |:-------------: |
 | var      | Declaration          | Function      | Yes       |
 | let      | Temporal dead zone   | Block         | No       |
 | const    | Temporal dead zone   | Block         | No       |
