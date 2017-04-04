@@ -284,3 +284,41 @@ Let’s look at an example. In the following destructuring, the element at index
 You can also use default values in object patterns:
 
           const {foo: x=3, bar: y} = {}; // x = 3; y = undefined
+
+### 10.5.1 undefined triggers default values
+### undefined引发默认值
+
+Default values are also used if a part does have a match and that match is undefined:
+
+            const [x=1] = [undefined]; // x = 1
+            const {prop: y=2} = {prop: undefined}; // y = 2
+
+
+### 10.5.2 Default values are computed on demand
+### 默认值也用来计算之后的值
+
+The default values themselves are only computed when they are needed. In other words, this destructuring:
+
+            const {prop: y=someFunc()} = someValue;
+            is equivalent to:
+
+            let y;
+            if (someValue.prop === undefined) {
+                y = someFunc();
+            } else {
+                y = someValue.prop;
+            }
+
+You can observe that if you use console.log():
+
+            > function log(x) { console.log(x); return 'YES' }
+
+            > const [a=log('hello')] = [];
+            > a
+            'YES'
+
+            > const [b=log('hello')] = [123];
+            > b
+            123
+
+In the second destructuring, the default value is not triggered and log() is not called.
