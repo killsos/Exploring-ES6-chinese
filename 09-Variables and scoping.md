@@ -703,4 +703,5 @@ An alternative to the just mentioned style rules is to use const only for things
 
   1. Prefer const: const marks immutable bindings.
   2. Prefer let: const marks immutable values.
+  
 I lean slightly in favor of #1, but #2 is fine, too.
