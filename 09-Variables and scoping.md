@@ -571,16 +571,85 @@ The scope of parameter default values is separate from the scope of the body (th
 
 JavaScript’s global object (window in web browsers, global in Node.js) is more a bug than a feature, especially with regard to performance. That’s why it makes sense that ES6 introduces a distinction:
 
+Javascript全局对象(客户端 window Nodejs global)是一个bug比特色在考虑性能。认清ES6并介绍特色
+
 * All properties of the global object are global variables. In global scope, the following declarations create such properties:
-  * var declarations
-  * Function declarations
+
+* 全局对象属性是全局变量 在全局作用域 下面声明就如创建一个属性
+
+  * var declarations  var声明
+  * Function declarations function声明
 
 * But there are now also global variables that are not properties of the global object. In global scope, the following declarations create such variables:
 
-  * let declarations
-  * const declarations
-  * Class declarations
+* 下面声明在全局作用域就不会成为全局的属性
+
+  * let declarations      let声明
+  * const declarations    const声明
+  * Class declarations    类声明
 
 Note that the bodies of modules are not executed in global scope, only scripts are. Therefore, the environments for various variables form the following chain.
 
+模块的代码不在全局作用域里面执行 仅仅是script方式 因而作用域链如下:
+
 ![http://exploringjs.com/es6/images/variables----environment_chain_150dpi.png](./variables----environment_chain_150dpi.png)
+
+### 9.8 Function declarations and class declarations
+### 函数与类的声明
+
+**Function declarations… 函数声明**
+
+* are block-scoped, like let.
+
+  是块级作用域 与let类似
+
+* create properties in the global object (while in global scope), like var.
+
+  在给全局对象创建一个属性 与var类似
+
+* are hoisted: independently of where a function declaration is mentioned in its scope, it is always created at the beginning of the scope.
+
+  预解析:函数声明独立在作用域发生 并且作用域最开始
+
+
+The following code demonstrates the hoisting of function declarations:
+
+{ // Enter a new scope
+
+    console.log(foo()); // OK, due to hoisting
+    function foo() {
+        return 'hello';
+    }
+}
+
+
+**Class declarations…类声明**
+
+* are block-scoped.
+
+  也是块级作用域
+
+* don’t create properties on the global object.
+
+  不会给全局对象创建属性
+
+* are not hoisted.
+
+  不会预解析
+
+Classes not being hoisted may be surprising, because, under the hood, they create functions. The rationale for this behavior is that the values of their extends clauses are defined via expressions and those expressions have to be executed at the appropriate times.
+
+
+类不预解析不是惊奇 因为为了extends恰当执行时机 因为extends可能继承是一个函数表达式 而函数表达式不会预解析
+
+{ // Enter a new scope
+
+    const identity = x => x;
+
+    // Here we are in the temporal dead zone of `MyClass`
+    const inst = new MyClass(); // ReferenceError
+
+    // Note the expression in the `extends` clause
+    class MyClass extends identity(Object) {
+    }
+}
