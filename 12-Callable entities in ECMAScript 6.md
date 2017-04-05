@@ -616,6 +616,86 @@ Legend – footnotes:
 
 Those work like their non-generator counterparts, with two exceptions:
 
-* Generator functions and methods have the prototype (GeneratorFunction).prototype ((GeneratorFunction) is an internal object, see diagram in Sect. “Inheritance within the iteration API (including generators)”).
+* Generator functions and methods have the prototype (GeneratorFunction).prototype
+ ((GeneratorFunction) is an internal object, see diagram in Sect.
+
+ “Inheritance within the iteration API (including generators)”).
 
 * You can’t constructor-call generator functions.
+
+
+### **12.4.1.2 The rules for this**
+
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>function call</th>
+      <th>Method call</th>
+      <th><code>new</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Traditional function (strict)</td>
+      <td><code>undefined</code></td>
+      <td>receiver</td>
+      <td>instance</td>
+    </tr>
+    <tr>
+      <td>Traditional function (sloppy)</td>
+      <td><code>window</code></td>
+      <td>receiver</td>
+      <td>instance</td>
+    </tr>
+    <tr>
+      <td>Generator function (strict)</td>
+      <td><code>undefined</code></td>
+      <td>receiver</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Generator function (sloppy)</td>
+      <td><code>window</code></td>
+      <td>receiver</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Method (strict)</td>
+      <td><code>undefined</code></td>
+      <td>receiver</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Method (sloppy)</td>
+      <td><code>window</code></td>
+      <td>receiver</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Generator method (strict)</td>
+      <td><code>undefined</code></td>
+      <td>receiver</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Generator method (sloppy)</td>
+      <td><code>window</code></td>
+      <td>receiver</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Arrow function (strict&amp;sloppy)</td>
+      <td>lexical</td>
+      <td>lexical</td>
+      <td><code>TypeError</code></td>
+    </tr>
+    <tr>
+      <td>Class (implicitly strict)</td>
+      <td><code>TypeError</code></td>
+      <td><code>TypeError</code></td>
+      <td>SC protocol</td>
+    </tr>
+  </tbody>
+
+</table>
