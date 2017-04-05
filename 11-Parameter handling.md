@@ -694,6 +694,8 @@ for-of循环 扩展操作符是用于可迭代的值 所有内建数据是可迭
 
 Should you ever encounter something that is not iterable, but Array-like (indexed elements plus a property length), you can use Array.from()6 to convert it to an Array:
 
+当遇到不可迭代的对象时候,
+
 对于类数组对象是也按索引存储数据同时附加一个length的属性 可以用Array.from()将类数组对象转为数组
 
           const arrayLike = {
