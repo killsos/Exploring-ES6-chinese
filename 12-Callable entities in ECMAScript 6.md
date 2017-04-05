@@ -611,7 +611,7 @@ Legend – footnotes:
 </ul>
 
 
-**What about generator functions and methods? **
+** What about generator functions and methods? **
 
 Those work like their non-generator counterparts, with two exceptions:
 
