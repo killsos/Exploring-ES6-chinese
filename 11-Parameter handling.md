@@ -505,6 +505,211 @@ Destructuring helps with handling the Array that the result of Promise.all() is 
 
 fetch() is a Promise-based version of XMLHttpRequest.[It is part of the Fetch standard.](https://fetch.spec.whatwg.org/#fetch-api)
 
-### 11.7 Coding style tips 
+### 11.7 Coding style tips
 
 This section mentions a few tricks for descriptive parameter definitions. They are clever, but they also have downsides: they add visual clutter and can make your code harder to understand.
+
+### 11.7.1 Optional parameters
+
+Some parameters have no default values, but can be omitted. In that case, I occasionally use the default value undefined to make it obvious that the parameter is optional. That is redundant, but descriptive.
+
+可选参数可以通过赋值为undefined
+
+          function foo(requiredParam, optionalParam = undefined) {
+              ···
+          }
+
+### 11.7.2 Required parameters
+
+In ECMAScript 5, you have a few options for ensuring that a required parameter has been provided, which are all quite clumsy:
+
+          function foo(mustBeProvided) {
+              if (arguments.length < 1) {
+                  throw new Error();
+              }
+              if (! (0 in arguments)) {
+                  throw new Error();
+              }
+              if (mustBeProvided === undefined) {
+                  throw new Error();
+              }
+              ···
+          }
+
+In ECMAScript 6, you can (ab)use default parameter values to achieve more concise code (credit: idea by Allen Wirfs-Brock):
+
+          /**
+           * Called if a parameter is missing and
+           * the default value is evaluated.
+           */
+          function mandatory() {
+              throw new Error('Missing parameter');
+          }
+          function foo(mustBeProvided = mandatory()) {
+              return mustBeProvided;
+          }
+          Interaction:
+
+          > foo()
+          Error: Missing parameter
+          > foo(123)
+          123
+
+### 11.7.3 Enforcing a maximum arity
+### 强迫最大参数
+
+This section presents three approaches to enforcing a maximum arity. The running example is a function f whose maximum arity is 2 – if a caller provides more than 2 parameters, an error should be thrown.
+
+设置参数个数最多 超过这个最多值得参数被扔掉
+
+The first approach is to collect all actual parameters in the formal rest parameter args and to check its length.
+
+
+
+          function f(...args) {
+              if (args.length > 2) {
+                  throw new Error();
+              }
+              // Extract the real parameters
+              let [x, y] = args;
+          }
+
+The second approach relies on unwanted actual parameters appearing in the formal rest parameter empty.
+
+          function f(x, y, ...empty) {
+              if (empty.length > 0) {
+                  throw new Error();
+              }
+          }
+
+The third approach uses a sentinel value that is gone if there is a third parameter. One caveat is that the default value OK is also triggered if there is a third parameter whose value is undefined.
+
+          const OK = Symbol();
+          function f(x, y, arity=OK) {
+              if (arity !== OK) {
+                  throw new Error();
+              }
+          }
+
+Sadly, each one of these approaches introduces significant visual and conceptual clutter. I’m tempted to recommend checking arguments.length, but I also want arguments to go away.
+
+          function f(x, y) {
+              if (arguments.length > 2) {
+                  throw new Error();
+              }
+          }
+
+
+### 11.8 The spread operator (...)
+
+The spread operator (...) looks exactly like the rest operator, but is its opposite:
+
+Rest operator: collects the remaining items of an iterable into an Array and is used for rest parameters and destructuring.
+
+可变操作符 将有的项目迭代到数组  可变操作符通常用到可变参数和解构
+
+Spread operator: turns the items of an iterable into arguments of a function call or into elements of an Array.
+
+扩展操作符 将参数扩展到一个数组
+
+### 11.8.1 Spreading into function and method calls
+
+Math.max() is a good example for demonstrating how the spread operator works in method calls. Math.max(x1, x2, ···) returns the argument whose value is greatest. It accepts an arbitrary number of arguments, but can’t be applied to Arrays. The spread operator fixes that:
+
+        > Math.max(-1, 5, 11, 3)
+        11
+        > Math.max(...[-1, 5, 11, 3])
+        11
+
+In contrast to the rest operator, you can use the spread operator anywhere in a sequence of parts:
+
+        > Math.max(-1, ...[-1, 5, 11], 3)
+        11
+
+Another example is JavaScript not having a way to destructively append the elements of one Array to another one. However, Arrays do have the method push(x1, x2, ···), which appends all of its arguments to its receiver. The following code shows how you can use push() to append the elements of arr2 to arr1.
+
+        const arr1 = ['a', 'b'];
+        const arr2 = ['c', 'd'];
+
+        arr1.push(...arr2);
+        // arr1 is now ['a', 'b', 'c', 'd']
+
+### 11.8.2 Spreading into constructors
+
+In addition to function and method calls, the spread operator also works for constructor calls:
+
+        new Date(...[1912, 11, 24]) // Christmas Eve 1912
+
+That is something that is difficult to achieve in ECMAScript 5.
+
+
+### 11.8.3 Spreading into Arrays
+
+The spread operator can also be used inside Array literals:
+
+        > [1, ...[2,3], 4]
+        [1, 2, 3, 4]
+
+That gives you a convenient way to concatenate Arrays:
+
+        const x = ['a', 'b'];
+        const y = ['c'];
+        const z = ['d', 'e'];
+
+        const arr = [...x, ...y, ...z]; // ['a', 'b', 'c', 'd', 'e']
+
+One advantage of the spread operator is that its operand can be any iterable value (in contrast to the Array method concat(), which does not support iteration).
+
+### 11.8.3.1 Converting iterable or Array-like objects to Arrays
+### 类数组对象也可以迭代
+
+The spread operator lets you convert any iterable value to an Array:
+
+可以将类数组对象 Set 可以将扩展操作符 转为数组
+
+        const arr = [...someIterableObject];
+
+        Let’s convert a Set to an Array:
+
+        const set = new Set([11, -1, 6]);
+        const arr = [...set]; // [11, -1, 6]
+
+Your own iterable objects can be converted to Arrays in the same manner:
+
+**任何对象只有Symbol.iterator**
+
+          const obj = {
+              * [Symbol.iterator]() {
+                  yield 'a';
+                  yield 'b';
+                  yield 'c';
+              }
+          };
+          const arr = [...obj]; // ['a', 'b', 'c']
+
+
+Note that, just like the for-of loop, the spread operator only works for iterable values. All built-in data structures are iterable: Arrays, Maps and Sets. All Array-like DOM data structures are also iterable.
+
+for-of循环 扩展操作符是用于可迭代的值 所有内建数据是可迭代：数组 Maps Sets 类数组DOM
+
+Should you ever encounter something that is not iterable, but Array-like (indexed elements plus a property length), you can use Array.from()6 to convert it to an Array:
+
+对于类数组对象是也按索引存储数据同时附加一个length的属性 可以用Array.from()将类数组对象转为数组
+
+          const arrayLike = {
+              '0': 'a',
+              '1': 'b',
+              '2': 'c',
+              length: 3
+          };
+
+          // ECMAScript 5:
+          var arr1 = [].slice.call(arrayLike); // ['a', 'b', 'c']
+
+          // ECMAScript 6:
+          const arr2 = Array.from(arrayLike); // ['a', 'b', 'c']
+
+          // TypeError: Cannot spread non-iterable value
+          const arr3 = [...arrayLike];
+
+扩展操作符的对象必须有Symbol.iterator属性
