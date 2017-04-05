@@ -496,3 +496,108 @@ Characteristics of the values produced by the entities:
   </tbody>
 
 </table>
+
+**Characteristics of the whole entities:**
+
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Func decl</th>
+      <th>Func expr</th>
+      <th>Arrow</th>
+      <th>Class</th>
+      <th>Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hoisted</td>
+      <td>✔</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>×</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Creates <code>window</code> prop. (1)</td>
+      <td>✔</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>×</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Inner name (2)</td>
+      <td>×</td>
+      <td>✔</td>
+      <td>&nbsp;</td>
+      <td>✔</td>
+      <td>×</td>
+    </tr>
+  </tbody>
+
+</table>
+
+**Characteristics of the bodies of the entities:**
+
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Func decl</th>
+      <th>Func expr</th>
+      <th>Arrow</th>
+      <th>Class (3)</th>
+      <th>Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>this</code></td>
+      <td>✔</td>
+      <td>✔</td>
+      <td>lex</td>
+      <td>✔</td>
+      <td>✔</td>
+    </tr>
+    <tr>
+      <td><code>new.target</code></td>
+      <td>✔</td>
+      <td>✔</td>
+      <td>lex</td>
+      <td>✔</td>
+      <td>✔</td>
+    </tr>
+    <tr>
+      <td><code>super.prop</code></td>
+      <td>×</td>
+      <td>×</td>
+      <td>lex</td>
+      <td>✔</td>
+      <td>✔</td>
+    </tr>
+    <tr>
+      <td><code>super()</code></td>
+      <td>×</td>
+      <td>×</td>
+      <td>×</td>
+      <td>✔</td>
+      <td>×</td>
+    </tr>
+  </tbody>
+
+</table>
+
+**Legend – table cells:**
+
+<ul>
+  <li>✔ exists, allowed</li>
+  <li>× does not exist, not allowed</li>
+  <li>Empty cell: not applicable, not relevant</li>
+  <li>lex: lexical, inherited from surrounding lexical scope</li>
+  <li>
+<code>F.p</code>: <code>Function.prototype</code>
+</li>
+  <li>SC: superclass for derived classes, <code>Function.prototype</code> for base classes. The details are explained in <a href="ch_classes.html#details-of-subclassing">the chapter on classes</a>.</li>
+</ul>
