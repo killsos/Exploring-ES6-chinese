@@ -385,3 +385,126 @@ With optional named parameters, that is not an issue. You can easily omit any of
           selectEntries(end=20, start=3)
 
           selectEntries()
+
+### 11.5.3 Simulating Named Parameters in JavaScript
+
+JavaScript does not have native support for named parameters, unlike Python and many other languages. But there is a reasonably elegant simulation: Each actual parameter is a property in an object literal whose result is passed as a single formal parameter to the callee. When you use this technique, an invocation of selectEntries() looks as follows.
+
+          selectEntries({ start: 3, end: 20, step: 2 });
+
+The function receives an object with the properties start, end, and step. You can omit any of them:
+
+          selectEntries({ step: 2 });
+          selectEntries({ end: 20, start: 3 });
+          selectEntries();
+          In ECMAScript 5, you’d implement selectEntries() as follows:
+
+          function selectEntries(options) {
+              options = options || {};
+              var start = options.start || 0;
+              var end = options.end || -1;
+              var step = options.step || 1;
+              ···
+          }
+
+In ECMAScript 6, you can use destructuring, which looks like this:
+
+          function selectEntries({ start=0, end=-1, step=1 }) {
+              ···
+          }
+
+If you call selectEntries() with zero arguments, the destructuring fails, because you can’t match an object pattern against undefined. That can be fixed via a default value. In the following code, the object pattern is matched against {} if the first parameter is missing.
+
+          function selectEntries({ start=0, end=-1, step=1 } = {}) {
+              ···
+          }
+
+You can also combine positional parameters with named parameters. It is customary for the latter to come last:
+
+          someFunc(posArg1, { namedArg1: 7, namedArg2: true });
+
+In principle, JavaScript engines could optimize this pattern so that no intermediate object is created, because both the object literals at the call sites and the object patterns in the function definitions are static.
+
+In JavaScript, the pattern for named parameters shown here is sometimes called options or option object (e.g., by the jQuery documentation).
+
+11.6 Examples of destructuring in parameter handling
+
+### 11.6.1 forEach() and destructuring
+
+You will probably mostly use the for-of loop in ECMAScript 6, but the Array method forEach() also profits from destructuring. Or rather, its callback does.
+
+First example: destructuring the Arrays in an Array.
+
+        const items = [ ['foo', 3], ['bar', 9] ];
+        items.forEach(([word, count]) => {
+            console.log(word+' '+count);
+        });
+
+Second example: destructuring the objects in an Array.
+
+        const items = [
+            { word:'foo', count:3 },
+            { word:'bar', count:9 },
+        ];
+        items.forEach(({word, count}) => {
+            console.log(word+' '+count);
+        });
+
+### 11.6.2 Transforming Maps
+
+An ECMAScript 6 Map doesn’t have a method map() (like Arrays). Therefore, one has to:
+
+Step 1: Convert it to an Array of [key,value] pairs.
+
+Step 2: map() the Array.
+
+Step 3: Convert the result back to a Map.
+
+This looks as follows.
+
+        const map0 = new Map([
+            [1, 'a'],
+            [2, 'b'],
+            [3, 'c'],
+        ]);
+
+        const map1 = new Map( // step 3
+            [...map0] // step 1
+            .map(([k, v]) => [k*2, '_'+v]) // step 2
+        );
+
+        // Resulting Map: {2 -> '_a', 4 -> '_b', 6 -> '_c'}
+
+### 11.6.3 Handling an Array returned via a Promise
+
+The tool method Promise.all() works as follows:
+
+* Input: an iterable of Promises.
+
+* Output: a Promise that is fulfilled with an Array as soon as the last input Promise is fulfilled. That Array contains the fulfillments of the input Promises.
+
+Destructuring helps with handling the Array that the result of Promise.all() is fulfilled with:
+
+        const urls = [
+            'http://example.com/foo.html',
+            'http://example.com/bar.html',
+            'http://example.com/baz.html',
+        ];
+
+        Promise.all(urls.map(downloadUrl))
+        .then(([fooStr, barStr, bazStr]) => {
+            ···
+        });
+
+        // This function returns a Promise that is fulfilled
+        // with a string (the text)
+        function downloadUrl(url) {
+            return fetch(url).then(request => request.text());
+        }
+
+
+fetch() is a Promise-based version of XMLHttpRequest.[It is part of the Fetch standard.](https://fetch.spec.whatwg.org/#fetch-api)
+
+### 11.7 Coding style tips 
+
+This section mentions a few tricks for descriptive parameter definitions. They are clever, but they also have downsides: they add visual clutter and can make your code harder to understand.
