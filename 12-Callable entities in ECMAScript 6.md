@@ -106,11 +106,20 @@ ES6三种调用方法：函数调用 方法调用 构造器调用
 * Constructor calls: new Constr(8)
 
 
-12.2.2 Calls via super are restricted to specific locations
+### 12.2.2 Calls via super are restricted to specific locations
 
 Two kinds of calls can be made via the super keyword; their use is restricted to specific locations:
 
-Super-method calls: super.method('abc')
+super调用的限制：
+
+* Super-method calls: super.method('abc')
+
 Only available within method definitions inside either object literals or derived class definitions.
-Super-constructor calls: super(8)
+
+Super-method调用仅在对象字面量或子类定义过程中
+
+* Super-constructor calls: super(8)
+
 Only available inside the special method constructor() inside a derived class definition.
+
+Super-constructor仅在constructor()调用
