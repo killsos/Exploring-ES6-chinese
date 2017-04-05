@@ -258,3 +258,130 @@ This restriction is probably most surprising if default values are closures:
             callback();
         }
         bar(); // ReferenceError
+
+### 11.4 Rest parameters
+
+Putting the rest operator (...) in front of the last formal parameter means that it will receive all remaining actual parameters in an Array.
+
+        function f(x, ...y) {
+            ···
+        }
+        f('a', 'b', 'c'); // x = 'a'; y = ['b', 'c']
+
+If there are no remaining parameters, the rest parameter will be set to the empty Array:
+
+        f(); // x = undefined; y = []
+
+
+The spread operator (...) looks exactly like the rest operator, but is used inside function calls and Array literals (not inside destructuring patterns).
+
+### 11.4.1 No more arguments!
+
+Rest parameters can completely replace JavaScript’s infamous special variable arguments. They have the advantage of always being Arrays:
+
+arguments  ...args
+
+        // ECMAScript 5: arguments
+        function logAllArguments() {
+            for (var i=0; i < arguments.length; i++) {
+                console.log(arguments[i]);
+            }
+        }
+
+        // ECMAScript 6: rest parameter
+        function logAllArguments(...args) {
+            for (const arg of args) {
+                console.log(arg);
+            }
+        }
+
+
+### 11.4.1.1 Combining destructuring and access to the destructured value
+
+One interesting feature of arguments is that you can have normal parameters and an Array of all parameters at the same time:
+
+arguments是数组
+
+        function foo(x=0, y=0) {
+            console.log('Arity: '+arguments.length);
+            ···
+        }
+
+You can avoid arguments in such cases if you combine a rest parameter with Array destructuring. The resulting code is longer, but more explicit:
+
+避免使用arguments 使用数组解构...args 这样代码简洁
+
+        function foo(...args) {
+            let [x=0, y=0] = args;
+            console.log('Arity: '+args.length);
+            ···
+        }
+
+The same technique works for named parameters (options objects):
+
+命名的参数
+
+        function bar(options = {}) {
+            let { namedParam1, namedParam2 } = options;
+            ···
+            if ('extra' in options) {
+                ···
+            }
+        }
+
+### 11.4.1.2 arguments is iterable
+
+arguments is iterable5 in ECMAScript 6, which means that you can use for-of and the spread operator:
+
+arguments在ES6是可迭代的 所以可以使用for-of 扩展操作符
+
+        > (function () { return typeof arguments[Symbol.iterator] }())
+        'function'
+
+        > (function () { return Array.isArray([...arguments]) }())
+        true
+
+### 11.5 Simulating named parameters
+
+When calling a function (or method) in a programming language, you must map the actual parameters (specified by the caller) to the formal parameters (of a function definition). There are two common ways to do so:
+
+* Positional parameters are mapped by position. The first actual parameter is mapped to the first formal parameter, the second actual to the second formal, and so on:
+
+位置参数
+
+          selectEntries(3, 20, 2)
+
+* Named parameters use names (labels) to perform the mapping. Formal parameters have labels. In a function call, these labels determine which value belongs to which formal parameter. It does not matter in which order named actual parameters appear, as long as they are labeled correctly. Simulating named parameters in JavaScript looks as follows.
+
+命名参数
+
+          selectEntries({ start: 3, end: 20, step: 2 })
+
+
+Named parameters have two main benefits: they provide descriptions for arguments in function calls and they work well for optional parameters. I’ll first explain the benefits and then show you how to simulate named parameters in JavaScript via object literals.
+
+### 11.5.1 Named Parameters as Descriptions
+
+As soon as a function has more than one parameter, you might get confused about what each parameter is used for. For example, let’s say you have a function, selectEntries(), that returns entries from a database. Given the function call:
+
+        selectEntries(3, 20, 2);
+
+what do these three numbers mean? Python supports named parameters, and they make it easy to figure out what is going on:
+
+        **Python syntax**
+
+        selectEntries(start=3, end=20, step=2)
+
+### 11.5.2 Optional Named Parameters
+
+Optional positional parameters work well only if they are omitted at the end. Anywhere else, you have to insert placeholders such as null so that the remaining parameters have correct positions.
+
+With optional named parameters, that is not an issue. You can easily omit any of them. Here are some examples:
+
+          **Python syntax**
+
+          selectEntries(step=2)
+
+          selectEntries(end=20, start=3)
+
+          selectEntries()
