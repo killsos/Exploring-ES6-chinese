@@ -603,3 +603,9 @@ Characteristics of the values produced by the entities:
 </ul>
 
 Legend – footnotes:
+
+<ul>
+  <li>(1) The rules for what declarations create properties on the global object are explained in <a href="ch_variables.html#sect_global-object">the chapter on variables and scoping</a>.</li>
+  <li>(2) The inner names of named function expressions and classes are explained in <a href="ch_classes.html#sec_classes-inner-names">the chapter on classes</a>.</li>
+  <li>(3) This column is about the body of the class constructor.</li>
+</ul>
