@@ -601,3 +601,5 @@ Characteristics of the values produced by the entities:
 </li>
   <li>SC: superclass for derived classes, <code>Function.prototype</code> for base classes. The details are explained in <a href="ch_classes.html#details-of-subclassing">the chapter on classes</a>.</li>
 </ul>
+
+Legend – footnotes:
