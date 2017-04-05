@@ -230,15 +230,23 @@ Note how much an arrow function with an expression body can reduce verbosity. Co
 
 Omitting the parentheses around the parameters is only possible if they consist of a single identifier:
 
+只有一个参数可以省略圆括号 其他都不可以
+
         > [1,2,3].map(x => 2 * x)
         [ 2, 4, 6 ]
 
 As soon as there is anything else, you have to type the parentheses, even if there is only a single parameter. For example, you need parens if you destructure a single parameter:
+
+如果你想解构一个参数 这时候虽然是一个参数 但是要加圆括号
 
         > [[1,2], [3,4]].map(([a,b]) => a + b)
         [ 3, 7 ]
 
 And you need parens if a single parameter has a default value (undefined triggers the default value!):
 
+如果需要括号如果参数有默认值 默认值通过undefined来触发
+
         > [1, undefined, 3].map((x='yes') => x)
         [ 1, 'yes', 3 ]
+
+### 13.4 Lexical variables
