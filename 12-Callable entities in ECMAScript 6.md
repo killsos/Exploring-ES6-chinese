@@ -1449,19 +1449,19 @@ It is undefined if there is no constructor call. We can use that to enforce that
 
 new.target是null 构造器没有调用 而是按照普通函数调用 我们强迫一个函数必须用new调用而不是普通方式 通过new.target或者this(ES5)
 
-function realFunction() {
-    if (new.target !== undefined) {
-        throw new Error('Can’t be invoked via `new`');
-    }
-    ···
-}
+          function realFunction() {
+              if (new.target !== undefined) {
+                  throw new Error('Can’t be invoked via `new`');
+              }
+              ···
+          }
 
-In ES5, this was usually checked like this:
+          In ES5, this was usually checked like this:
 
-function realFunction() {
-    "use strict";
-    if (this !== undefined) {
-        throw new Error('Can’t be invoked via `new`');
-    }
-    ···
-}
+          function realFunction() {
+              "use strict";
+              if (this !== undefined) {
+                  throw new Error('Can’t be invoked via `new`');
+              }
+              ···
+          }
