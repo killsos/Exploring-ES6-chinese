@@ -609,3 +609,12 @@ Legend – footnotes:
   <li>(2) The inner names of named function expressions and classes are explained in <a href="ch_classes.html#sec_classes-inner-names">the chapter on classes</a>.</li>
   <li>(3) This column is about the body of the class constructor.</li>
 </ul>
+
+
+**What about generator functions and methods? **
+
+Those work like their non-generator counterparts, with two exceptions:
+
+* Generator functions and methods have the prototype (GeneratorFunction).prototype ((GeneratorFunction) is an internal object, see diagram in Sect. “Inheritance within the iteration API (including generators)”).
+
+* You can’t constructor-call generator functions.
