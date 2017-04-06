@@ -43,3 +43,283 @@ Classes (which are explained in the next chapter) are the major new OOP feature 
   * 14.9.1. Can I use super in object literals?
 
 ---
+
+### 14.1 Overview
+
+### 14.1.1 New object literal features
+
+Method definitions:
+
+方法定义
+
+      const obj = {
+          myMethod(x, y) {
+              ···
+          }
+      };
+
+Property value shorthands:
+
+      const first = 'Jane';
+      const last = 'Doe';
+
+      const obj = { first, last };
+
+      // Same as:
+      const obj = { first: first, last: last };
+
+Computed property keys:
+
+      const propKey = 'foo';
+      const obj = {
+          [propKey]: true,
+          ['b'+'ar']: 123
+      };
+
+This new syntax can also be used for method definitions:
+
+        const obj = {
+            ['h'+'ello']() {
+                return 'hi';
+            }
+        };
+        console.log(obj.hello()); // hi
+
+The main use case for computed property keys is to make it easy to use symbols as property keys.
+
+对象计算属性主要为了symbols作为属性名字
+
+### 14.1.2 New methods in Object
+
+The most important new method of **Object is assign()**.
+
+Traditionally, this functionality was called extend() in the JavaScript world.
+
+In contrast to how this classic operation works, Object.assign() only considers own (non-inherited) properties.
+
+          const obj = { foo: 123 };
+          Object.assign(obj, { bar: true });
+          console.log(JSON.stringify(obj));
+          // {"foo":123,"bar":true}
+
+Object.assign(target, ...sources)
+
+Object.assign() 方法用于将所有可枚举的属性的值从一个或多个源对象复制到目标对象。它将返回目标对象。
+
+### 14.2 New features of object literals
+
+### 14.2.1 Method definitions
+
+In ECMAScript 5, methods are properties whose values are functions:
+
+          var obj = {
+              myMethod: function (x, y) {
+                  ···
+              }
+          };
+
+In ECMAScript 6, methods are still function-valued properties, but there is now a more compact way of defining them:
+
+        const obj = {
+            myMethod(x, y) {
+                ···
+            }
+        };
+
+Getters and setters continue to work as they did in ECMAScript 5 (note how syntactically similar they are to method definitions):
+
+        const obj = {
+            get foo() {
+                console.log('GET foo');
+                return 123;
+            },
+            set bar(value) {
+                console.log('SET bar to '+value);
+                // return value is ignored
+            }
+        };
+        Let’s use obj:
+
+        > obj.foo
+        GET foo
+        123
+        > obj.bar = true
+        SET bar to true
+        true
+
+
+There is also a way to concisely define properties whose values are generator functions:
+
+        const obj = {
+            * myGeneratorMethod() {
+                ···
+            }
+        };
+
+        This code is equivalent to:
+
+        const obj = {
+            myGeneratorMethod: function* () {
+                ···
+            }
+        };
+
+
+### 14.2.2 Property value shorthands
+
+Property value shorthands let you abbreviate the definition of a property in an object literal: If the name of the variable that specifies the property value is also the property key then you can omit the key. This looks as follows.
+
+        const x = 4;
+        const y = 1;
+        const obj = { x, y };
+
+The last line is equivalent to:
+
+        const obj = { x: x, y: y };
+
+Property value shorthands work well together with destructuring:
+
+        const obj = { x: 4, y: 1 };
+        const {x,y} = obj;
+        console.log(x); // 4
+        console.log(y); // 1
+
+One use case for property value shorthands are multiple return values (which are explained in the chapter on destructuring).
+
+### 14.2.3 Computed property keys
+
+Remember that there are two ways of specifying a key when you set a property.
+
+1. Via a fixed name: obj.foo = true;
+2. Via an expression: obj['b'+'ar'] = 123;
+
+In object literals, you only have option #1 in ECMAScript 5. ECMAScript 6 additionally provides option #2:
+
+        const propKey = 'foo';
+        const obj = {
+            [propKey]: true,
+            ['b'+'ar']: 123
+        };
+
+This new syntax can also be used for method definitions:
+
+        const obj = {
+            ['h'+'ello']() {
+                return 'hi';
+            }
+        };
+        console.log(obj.hello()); // hi
+
+The main use case for computed property keys are symbols: you can define a public symbol and use it as a special property key that is always unique. One prominent example is the symbol stored in Symbol.iterator.
+
+If an object has a method with that key, it becomes iterable: The method must return an iterator, which is used by constructs such as the for-of loop to iterate over the object. The following code demonstrates how that works.
+
+        const obj = {
+            * [Symbol.iterator]() { // (A)
+                yield 'hello';
+                yield 'world';
+            }
+        };
+
+        for (const x of obj) {
+            console.log(x);
+        }
+        // Output:
+        // hello
+        // world
+
+Line A starts a generator method definition with a computed key (the symbol stored in Symbol.iterator).
+
+
+### 14.3 New methods of Object
+
+### 14.3.1 Object.assign(target, source_1, source_2, ···)
+
+This method merges the sources into the target: It modifies target, first copies all enumerable own (non-inherited) properties of source_1 into it, then all own properties of source_2, etc. At the end, it returns the target.
+
+        const obj = { foo: 123 };
+        Object.assign(obj, { bar: true });
+        console.log(JSON.stringify(obj));
+            // {"foo":123,"bar":true}
+
+
+Let’s look more closely at how Object.assign() works:
+
+Both kinds of property keys: Object.assign() is aware of both strings and symbols as property keys.
+Only enumerable own properties: Object.assign() ignores inherited properties and properties that are not enumerable.
+
+Reading a value from a source: normal “get” operation (const value = source[propKey]). That means that if the source has a getter whose key is propKey then it will be invoked. All properties created by Object.assign() are data properties, it won’t transfer getters to the target.
+
+Writing a value to the target: normal “set” operation (target[propKey] = value). That means that if the target has a setter whose key is propKey then it will be invoked with value.
+
+This is how you’d copy all properties (not just enumerable ones), while correctly transferring getters and setters, without invoking setters on the target:
+
+      function copyAllProperties(target, ...sources) {
+          for (const source of sources) {
+              for (const key of Reflect.ownKeys(source)) {
+                  const desc = Object.getOwnPropertyDescriptor(source, key);
+                  Object.defineProperty(target, key, desc);
+              }
+          }
+          return target;
+      }
+
+
+### 14.3.1.1 Caveat: Object.assign() doesn’t work well for moving methods
+
+On one hand, you can’t move a method that uses super: Such a method has the internal slot [[HomeObject]] that ties it to the object it was created in. If you move it via Object.assign(), it will continue to refer to the super-properties of the original object. Details are explained in a section in the chapter on classes.
+
+
+On the other hand, enumerability is wrong if you move methods created by an object literal into the prototype of a class. The former methods are all enumerable (otherwise Object.assign() wouldn’t see them, anyway), but the prototype only has non-enumerable methods by default.
+
+### 14.3.1.2 Use cases for Object.assign()
+
+Let’s look at a few use cases.
+
+### 14.3.1.2.1 Adding properties to this
+
+You can use Object.assign() to add properties to this in a constructor:
+
+          class Point {
+              constructor(x, y) {
+                  Object.assign(this, {x, y});
+              }
+          }
+
+### 14.3.1.2.2 Providing default values for object properties
+
+Object.assign() is also useful for filling in defaults for missing properties. In the following example, we have an object DEFAULTS with default values for properties and an object options with data.
+
+          const DEFAULTS = {
+              logLevel: 0,
+              outputFormat: 'html'
+          };
+
+          function processContent(options) {
+              options = Object.assign({}, DEFAULTS, options); // (A)
+              ···
+          }
+
+In line A, we created a fresh object, copied the defaults into it and then copied options into it, overriding the defaults. Object.assign() returns the result of these operations, which we assign to options.
+
+### 14.3.1.2.3 Adding methods to objects
+
+Another use case is adding methods to objects:
+
+          Object.assign(SomeClass.prototype, {
+              someMethod(arg1, arg2) {
+                  ···
+              },
+              anotherMethod() {
+                  ···
+              }
+          });
+
+You could also manually assign functions, but then you don’t have the nice method definition syntax and need to mention SomeClass.prototype each time:
+
+          SomeClass.prototype.someMethod = function (arg1, arg2) {
+              ···
+          };
+          SomeClass.prototype.anotherMethod = function () {
+              ···
+          };
