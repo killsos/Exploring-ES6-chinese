@@ -482,3 +482,28 @@ retrieves all keys of all own properties.
 retrieves all string keys of all enumerable properties (inherited and own).
 
 返回所有可枚举的无论继承还是自己的字符串属性名字
+
+### 14.4.2 Traversal order of properties
+
+ES6 defines two traversal orders for properties.
+
+**Own Property Keys**:
+
+* Retrieves the keys of all own properties of an object, in the following order:
+
+  * First, the string keys that are integer indices (what these are is explained in the next section), in ascending numeric order.
+
+  * Then all other string keys, in the order in which they were added to the object.
+
+  * Lastly, all symbol keys, in the order in which they were added to the object.
+
+* Used by: Object.assign(), Object.defineProperties(), Object.getOwnPropertyNames(), Object.getOwnPropertySymbols(), Reflect.ownKeys()
+
+**Enumerable Own Names:**
+
+* Retrieves the string keys of all enumerable own properties of an object. The order is not defined by ES6, but it must be the same order in which for-in traverses properties.
+
+* Used by: JSON.parse(), JSON.stringify(), Object.keys()
+The order in which for-in traverses properties is not defined. [Quoting Allen Wirfs-Brock](https://mail.mozilla.org/pipermail/es-discuss/2015-August/043998.html):
+
+Historically, the for-in order was not defined and there has been variation among browser implementations in the order they produce (and other specifics). ES5 added Object.keys and the requirement that it should order the keys identically to for-in. During development of both ES5 and ES6, the possibility of defining a specific for-in order was considered but not adopted because of web legacy compatibility concerns and uncertainty about the willingness of browsers to make changes in the ordering they currently produce.
