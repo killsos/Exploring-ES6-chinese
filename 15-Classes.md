@@ -530,3 +530,182 @@ This section explains four approaches for managing private data for ES6 classes:
 4. Using symbols as keys for private properties
 
 Approaches #1 and #2 were already common in ES5, for constructors. Approaches #3 and #4 are new in ES6. Let’s implement the same example four times, via each of the approaches.
+
+### 15.3.1 Private data via constructor environments
+
+Our running example is a class Countdown that invokes a callback action once a counter (whose initial value is counter) reaches zero. The two parameters action and counter should be stored as private data.
+
+In the first implementation, we store action and counter in the environment of the class constructor.
+
+An environment is the internal data structure, in which a JavaScript engine stores the parameters and local variables that come into existence whenever a new scope is entered (e.g. via a function call or a constructor call).
+
+This is the code:
+
+          class Countdown {
+              constructor(counter, action) {
+                  Object.assign(this, {
+                      dec() {
+                          if (counter < 1) return;
+                          counter--;
+                          if (counter === 0) {
+                              action();
+                          }
+                      }
+                  });
+              }
+          }
+
+Using Countdown looks like this:
+
+          > const c = new Countdown(2, () => console.log('DONE'));
+          > c.dec();
+          > c.dec();
+          DONE
+
+Pros: 赞成
+
+1. The private data is completely safe
+
+2. The names of private properties won’t clash with the names of other private properties (of superclasses or subclasses).
+
+Cons: 反对
+
+1. The code becomes less elegant, because you need to add all methods to the instance, inside the constructor (at least those methods that need access to the private data).
+
+2. Due to the instance methods, the code wastes memory. If the methods were prototype methods, they would be shared.
+
+More information on this technique: Sect. “Private Data in the Environment of a Constructor (Crockford Privacy Pattern)” in “Speaking JavaScript”.
+
+
+### 15.3.2 Private data via a naming convention
+
+The following code keeps private data in properties whose names a marked via a prefixed underscore:
+
+私有属性前面加前缀的下划线 _
+
+            class Countdown {
+                constructor(counter, action) {
+                    this._counter = counter;
+                    this._action = action;
+                }
+                dec() {
+                    if (this._counter < 1) return;
+                    this._counter--;
+                    if (this._counter === 0) {
+                        this._action();
+                    }
+                }
+            }
+
+Pros:
+
+Code looks nice.
+
+We can use prototype methods.
+
+Cons:
+
+Not safe, only a guideline for client code.
+
+The names of private properties can clash.
+
+### 5.3.3 Private data via WeakMaps
+### 私有数据与WeakMaps
+
+There is a neat technique involving WeakMaps that combines the advantage of the first approach (safety) with the advantage of the second approach (being able to use prototype methods).
+
+This technique is demonstrated in the following code: we use the WeakMaps _counter and _action to store private data.
+
+          const _counter = new WeakMap();
+          const _action = new WeakMap();
+
+          class Countdown {
+
+              constructor(counter, action) {
+                  _counter.set(this, counter);
+                  _action.set(this, action);
+              }
+
+              dec() {
+                  let counter = _counter.get(this);
+                  if (counter < 1) return;
+                  counter--;
+                  _counter.set(this, counter);
+                  if (counter === 0) {
+                      _action.get(this)();
+                  }
+              }
+          }
+
+Each of the two WeakMaps _counter and _action maps objects to their private data.
+
+Due to how WeakMaps work that won’t prevent objects from being garbage-collected.
+
+As long as you keep the WeakMaps hidden from the outside world, the private data is safe.
+
+If you want to be even safer, you can store WeakMap.prototype.get and WeakMap.prototype.set in variables and invoke those (instead of the methods, dynamically):
+
+          const set = WeakMap.prototype.set;
+          ···
+          set.call(_counter, this, counter);
+              // _counter.set(this, counter);
+
+Then your code won’t be affected if malicious code replaces those methods with ones that snoop on our private data.
+
+However, you are only protected against code that runs after your code. There is nothing you can do if it runs before yours.
+
+Pros:
+
+1. We can use prototype methods.
+2. Safer than a naming convention for property keys.
+3. The names of private properties can’t clash.
+4. Relatively elegant.
+
+Con:
+
+Code is not as elegant as a naming convention.
+
+### 15.3.4 Private data via symbols
+
+Another storage location for private data are properties whose keys are symbols:
+
+        const _counter = Symbol('counter');
+        const _action = Symbol('action');
+
+        class Countdown {
+            constructor(counter, action) {
+                this[_counter] = counter;
+                this[_action] = action;
+            }
+
+            dec() {
+                if (this[_counter] < 1) return;
+                this[_counter]--;
+                if (this[_counter] === 0) {
+                    this[_action]();
+                }
+            }
+        }
+
+Each symbol is unique, which is why a symbol-valued property key will never clash with any other property key. Additionally, symbols are somewhat hidden from the outside world, but not completely:
+
+          const c = new Countdown(2, () => console.log('DONE'));
+
+          console.log(Object.keys(c));
+              // []
+          console.log(Reflect.ownKeys(c));
+              // [ Symbol(counter), Symbol(action) ]
+
+Pros:
+
+1. We can use prototype methods.
+2. The names of private properties can’t clash.
+
+Cons:
+
+1. Code is not as elegant as a naming convention.
+2.Not safe: you can list all property keys (including symbols!) of an object via Reflect.ownKeys().
+
+### 15.3.5 Further reading 
+
+Sect. “Keeping Data Private” in “Speaking JavaScript” (covers ES5 techniques)
