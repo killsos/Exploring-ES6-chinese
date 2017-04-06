@@ -979,3 +979,535 @@ The next section examines the structure of the objects that were created by the 
 The previous example creates the following objects.
 
 <img src="./classes----subclassing_es6_150dpi.png" />
+
+
+Prototype chains are objects linked via the [[Prototype]] relationship (which is an inheritance relationship). In the diagram, you can see two prototype chains:
+
+### 15.6.1.1 Left column: classes (functions)
+
+The prototype of a derived class is the class it extends. The reason for this setup is that you want a subclass to inherit all properties of its superclass:
+
+          > Employee.logNames === Person.logNames
+          true
+
+The prototype of a base class is Function.prototype, which is also the prototype of functions:
+
+        > const getProto = Object.getPrototypeOf.bind(Object);
+
+        > getProto(Person) === Function.prototype
+        true
+        > getProto(function () {}) === Function.prototype
+        true
+
+That means that base classes and all their derived classes (their prototypees) are functions. Traditional ES5 functions are essentially base classes.
+
+
+### 15.6.1.2 Right column: the prototype chain of the instance
+
+The main purpose of a class is to set up this prototype chain. The prototype chain ends with Object.prototype (whose prototype is null). That makes Object an implicit superclass of every base class (as far as instances and the instanceof operator are concerned).
+
+The reason for this setup is that you want the instance prototype of a subclass to inherit all properties of the superclass instance prototype.
+
+As an aside, objects created via object literals also have the prototype
+
+Object.prototype:
+
+          > Object.getPrototypeOf({}) === Object.prototype
+          true
+
+### 15.6.2 Allocating and initializing instances
+
+The data flow between class constructors is different from the canonical way of subclassing in ES5. Under the hood, it roughly looks as follows.
+
+              // Base class: this is where the instance is allocated
+              function Person(name) {
+                  // Performed before entering this constructor:
+                  this = Object.create(new.target.prototype);
+
+                  this.name = name;
+              }
+              ···
+
+              function Employee(name, title) {
+                  // Performed before entering this constructor:
+                  this = uninitialized;
+
+                  this = Reflect.construct(Person, [name], new.target); // (A)
+                      // super(name);
+
+                  this.title = title;
+              }
+              Object.setPrototypeOf(Employee, Person);
+              ···
+
+              const jane = Reflect.construct( // (B)
+                           Employee, ['Jane', 'CTO'],
+                           Employee);
+                  // const jane = new Employee('Jane', 'CTO')
+
+The instance object is created in different locations in ES6 and ES5:
+
+In ES6, it is created in the base constructor, the last in a chain of constructor calls. The superconstructor is invoked via super(), which triggers a constructor call.
+
+In ES5, it is created in the operand of new, the first in a chain of constructor calls. The superconstructor is invoked via a function call.
+
+The previous code uses two new ES6 features:
+
+
+new.target is an implicit parameter that all functions have. In a chain of constructor calls, its role is similar to this in a chain of supermethod calls.
+
+new.target是隐式参数 所有的函数有这个隐式参数 如果一个函数被constructor方式被调用 它角色类似于this的super调用链
+
+If a constructor is directly invoked via new (as in line B), the value of new.target is that constructor.
+
+new.target是constructor方法的结果
+
+If a constructor is called via super() (as in line A), the value of new.target is the new.target of the constructor that makes the call.
+
+During a normal function call, it is undefined. That means that you can use new.target to determine whether a function was function-called or constructor-called (via new).
+
+**Inside an arrow function, new.target refers to the new.target of the surrounding non-arrow function.**
+
+Reflect.construct() lets you make constructor calls while specifying new.target via the last parameter.
+
+The advantage of this way of subclassing is that it enables normal code to subclass built-in constructors (such as Error and Array). A later section explains why a different approach was necessary.
+
+As a reminder, here is how you do subclassing in ES5:
+
+              function Person(name) {
+                  this.name = name;
+              }
+              ···
+
+              function Employee(name, title) {
+                  Person.call(this, name);
+                  this.title = title;
+              }
+              Employee.prototype = Object.create(Person.prototype);
+              Employee.prototype.constructor = Employee;
+              ···
+
+### 15.6.2.1 Safety checks
+
+* this originally being uninitialized in derived constructors means that an error is thrown if they access this in any way before they have called super().
+
+* Once this is initialized, calling super() produces a ReferenceError. This protects you against calling super() twice.
+
+* If a constructor returns implicitly (without a return statement), the result is this. If this is uninitialized, a ReferenceError is thrown. This protects you against forgetting to call super().
+
+* If a constructor explicitly returns a non-object (including undefined and null), the result is this (this behavior is required to remain compatible with ES5 and earlier). If this is uninitialized, a TypeError is thrown.
+
+* If a constructor explicitly returns an object, it is used as its result. Then it doesn’t matter whether this is initialized or not.
+
+### 15.6.2.2 The extends clause
+
+Let’s examine how the extends clause influences how a class is set up (Sect. 14.5.14 of the spec).
+
+The value of an extends clause must be “constructible” (invocable via new). null is allowed, though.
+
+        class C {
+        }
+
+* Constructor kind: base
+* Prototype of C: Function.prototype (like a normal function)
+* Prototype of C.prototype: Object.prototype (which is also the prototype of objects created via object literals)
+
+        class C extends B {
+        }
+
+* Constructor kind: derived
+* Prototype of C: B
+* Prototype of C.prototype: B.prototype
+
+        class C extends Object {
+        }
+
+* Constructor kind: derived
+* Prototype of C: Object
+* Prototype of C.prototype: Object.prototype
+
+Note the following subtle difference with the first case: If there is no extends clause, the class is a base class and allocates instances. If a class extends Object, it is a derived class and Object allocates the instances. The resulting instances (including their prototype chains) are the same, but you get there differently.
+
+        class C extends null {
+        }
+
+* Constructor kind: base (as of ES2016)
+* Prototype of C: Function.prototype
+* Prototype of C.prototype: null
+
+Such a class lets you avoid Object.prototype in the prototype chain.
+
+
+### 15.6.3 Why can’t you subclass built-in constructors in ES5?
+
+In ECMAScript 5, most built-in constructors can’t be subclassed (several work-arounds exist).
+
+To understand why, let’s use the canonical ES5 pattern to subclass Array. As we shall soon find out, this doesn’t work.
+
+          function MyArray(len) {
+              Array.call(this, len); // (A)
+          }
+
+          MyArray.prototype = Object.create(Array.prototype);
+
+Unfortunately, if we instantiate MyArray, we find out that it doesn’t work properly: The instance property length does not change in reaction to us adding Array elements:
+
+          > var myArr = new MyArray(0);
+          > myArr.length
+          0
+          > myArr[0] = 'foo';
+          > myArr.length
+          0
+
+There are two obstracles that prevent myArr from being a proper Array.
+
+First obstacle: initialization. The this you hand to the constructor Array (in line A) is completely ignored. That means you can’t use Array to set up the instance that was created for MyArray.
+
+          > var a = [];
+          > var b = Array.call(a, 3);
+          > a !== b  // a is ignored, b is a new object
+          true
+          > b.length // set up correctly
+          3
+          > a.length // unchanged
+          0
+**Second obstacle: allocation. **
+
+The instance objects created by Array are exotic (a term used by the ECMAScript specification for objects that have features that normal objects don’t have): Their property length tracks and influences the management of Array elements. In general, exotic objects can be created from scratch, but you can’t convert an existing normal object into an exotic one. Unfortunately, that is what Array would have to do, when called in line A: It would have to turn the normal object created for MyArray into an exotic Array object.
+
+### 15.6.3.1 The solution: ES6 subclassing
+
+In ECMAScript 6, subclassing Array looks as follows:
+
+          class MyArray extends Array {
+              constructor(len) {
+                  super(len);
+              }
+          }
+          This works:
+
+          > const myArr = new MyArray(0);
+          > myArr.length
+          0
+          > myArr[0] = 'foo';
+          > myArr.length
+          1
+
+Let’s examine how the ES6 approach to subclassing removes the previously mentioned obstacles:
+
+* The first obstacle, Array not being able to set up an instance, is removed by Array returning a fully configured instance. In contrast to ES5, this instance has the prototype of the subclass.
+
+* The second obstacle, subconstructors not creating exotic instances, is removed by derived classes relying on base classes for allocating instances.
+
+### 15.6.4 Referring to superproperties in methods
+
+The following ES6 code makes a supermethod call in line B.
+
+          class Person {
+              constructor(name) {
+                  this.name = name;
+              }
+              toString() { // (A)
+                  return `Person named ${this.name}`;
+              }
+          }
+
+          class Employee extends Person {
+              constructor(name, title) {
+                  super(name);
+                  this.title = title;
+              }
+              toString() {
+                  return `${super.toString()} (${this.title})`; // (B)
+              }
+          }
+
+          const jane = new Employee('Jane', 'CTO');
+          console.log(jane.toString()); // Person named Jane (CTO)
+
+To understand how super-calls work, let’s look at the object diagram of jane:
+
+<img src="./classes----supercalls_150dpi.png" />
+
+In line B, Employee.prototype.toString makes a super-call (line B) to the method (starting in line A) that it has overridden. Let’s call the object, in which a method is stored, the home object of that method. For example, Employee.prototype is the home object of Employee.prototype.toString().
+
+The super-call in line B involves three steps:
+
+1. Start your search in the prototype of the home object of the current method.
+
+2. Look for a method whose name is toString. That method may be found in the object where the search started or later in the prototype chain.
+
+3. Call that method with the current this. The reason for doing so is: the super-called method must be able to access the same instance properties (in our example, the own properties of jane).
+
+Note that even if you are only getting (super.prop) or setting (super.prop = 123) a superproperty (versus making a method call), this may still (internally) play a role in step #3, because a getter or a setter may be invoked.
+
+Let’s express these steps in three different – but equivalent – ways:
+
+          // Variation 1: supermethod calls in ES5
+          var result = Person.prototype.toString.call(this) // steps 1,2,3
+
+          // Variation 2: ES5, refactored
+          var superObject = Person.prototype; // step 1
+          var superMethod = superObject.toString; // step 2
+          var result = superMethod.call(this) // step 3
+
+          // Variation 3: ES6
+          var homeObject = Employee.prototype;
+          var superObject = Object.getPrototypeOf(homeObject); // step 1
+          var superMethod = superObject.toString; // step 2
+          var result = superMethod.call(this) // step 3
+
+Variation 3 is how ECMAScript 6 handles super-calls. This approach is supported by two internal bindings that the environments of functions have (environments provide storage space, so-called bindings, for the variables in a scope):
+
+* [[thisValue]]: This internal binding also exists in ECMAScript 5 and stores the value of this.
+
+* [[HomeObject]]: Refers to the home object of the environment’s function. Filled in via the internal slot [[HomeObject]] that all methods have that use super. Both the binding and the slot are new in ECMAScript 6.
+
+**Methods are a special kind of function now**
+
+In a class, a method definition that uses super creates a special kind of function: It is still a function, but it has the internal slot [[HomeObject]]. That slot is set up by the method definition and can’t be changed in JavaScript. Therefore, you can’t meaningfully move such a method to a different object. (But maybe it’ll be possible in a future version of ECMAScript.)
+
+### 15.6.4.1 Where can you use super?
+
+Referring to superproperties is handy whenever prototype chains are involved, which is why you can use it in method definitions (incl. generator method definitions, getters and setters) inside object literals and class definitions. The class can be derived or not, the method can be static or not.
+
+Using super to refer to a property is not allowed in function declarations, function expressions and generator functions.
+
+### 15.6.4.2 Pitfall: A method that uses super can’t be moved
+
+You can’t move a method that uses super: Such a method has the internal slot [[HomeObject]] that ties it to the object it was created in. If you move it via an assignment, it will continue to refer to the superproperties of the original object. In future ECMAScript versions, there may be a way to transfer such a method, too.
+
+### 15.7 The species pattern
+
+One more mechanism of built-in constructors has been made extensible in ECMAScript 6: Sometimes a method creates new instances of its class. If you create a subclass – should the method return an instance of its class or an instance of the subclass? A few built-in ES6 methods let you configure how they create instances via the so-called species pattern.
+
+As an example, consider a subclass SortedArray of Array. If we invoke map() on instances of that class, we want it to return instances of Array, to avoid unnecessary sorting. By default, map() returns instances of the receiver (this), but the species patterns lets you change that.
+
+### 15.7.1 Helper methods for examples
+
+In the following three sections, I’ll use two helper functions in the examples:
+
+          function isObject(value) {
+              return (value !== null
+                 && (typeof value === 'object'
+                     || typeof value === 'function'));
+          }
+
+          /**
+           * Spec-internal operation that determines whether `x`
+           * can be used as a constructor.
+           */
+          function isConstructor(x) {
+              ···
+          }
+
+### 15.7.2 The standard species pattern
+
+The standard species pattern is used by Promise.prototype.then(), the filter() method of Typed Arrays and other operations. It works as follows:
+
+* If this.constructor[Symbol.species] exists, use it as a constructor for the new instance.
+
+* Otherwise, use a default constructor (e.g. Array for Arrays).
+
+Implemented in JavaScript, the pattern would look like this:
+
+            function SpeciesConstructor(O, defaultConstructor) {
+                const C = O.constructor;
+                if (C === undefined) {
+                    return defaultConstructor;
+                }
+                if (! isObject(C)) {
+                    throw new TypeError();
+                }
+                const S = C[Symbol.species];
+                if (S === undefined || S === null) {
+                    return defaultConstructor;
+                }
+                if (! isConstructor(S)) {
+                    throw new TypeError();
+                }
+                return S;
+            }
+
+### 15.7.3 The species pattern for Arrays
+
+Normal Arrays implement the species pattern slightly differently:
+
+            function ArraySpeciesCreate(self, length) {
+                let C = undefined;
+                // If the receiver `self` is an Array,
+                // we use the species pattern
+                if (Array.isArray(self)) {
+                    C = self.constructor;
+                    if (isObject(C)) {
+                        C = C[Symbol.species];
+                    }
+                }
+                // Either `self` is not an Array or the species
+                // pattern didn’t work out:
+                // create and return an Array
+                if (C === undefined || C === null) {
+                    return new Array(length);
+                }
+                if (! IsConstructor(C)) {
+                    throw new TypeError();
+                }
+                return new C(length);
+            }
+
+Array.prototype.map() creates the Array it returns via ArraySpeciesCreate(this, this.length).
+
+### 15.7.4 The species pattern in static methods
+
+Promises use a variant of the species pattern for static methods such as Promise.all():
+
+        let C = this; // default
+        if (! isObject(C)) {
+            throw new TypeError();
+        }
+
+// The default can be overridden via the property `C[Symbol.species]`
+
+        const S = C[Symbol.species];
+        if (S !== undefined && S !== null) {
+            C = S;
+        }
+        if (!IsConstructor(C)) {
+            throw new TypeError();
+        }
+        const instance = new C(···);
+
+### 15.7.5 Overriding the default species in subclasses
+
+This is the default getter for the property [Symbol.species]:
+
+        static get [Symbol.species]() {
+            return this;
+        }
+
+This default getter is implemented by the built-in classes Array, ArrayBuffer, Map, Promise, RegExp, Set and %TypedArray%. It is automatically inherited by subclasses of these built-in classes.
+
+There are two ways in which you can override the default species: with a constructor of your choosing or with null.
+
+### 15.7.5.1 Setting the species to a constructor of your choosing
+
+You can override the default species via a static getter (line A):
+
+        class MyArray1 extends Array {
+            static get [Symbol.species]() { // (A)
+                return Array;
+            }
+        }
+
+As a result, map() returns an instance of Array:
+
+        const result1 = new MyArray1().map(x => x);
+        console.log(result1 instanceof Array); // true
+
+If you don’t override the default species, map() returns an instance of the subclass:
+
+        class MyArray2 extends Array { }
+
+        const result2 = new MyArray2().map(x => x);
+        console.log(result2 instanceof MyArray2); // true
+
+### 15.7.5.1.1 Specifying the species via a data property
+
+If you don’t want to use a static getter, you need to use Object.defineProperty(). You can’t use assignment, as there is already a property with that key that only has a getter. That means that it is read-only and can’t be assigned to.
+
+For example, here we set the species of MyArray1 to Array:
+
+        Object.defineProperty(
+            MyArray1, Symbol.species, {
+                value: Array
+            });
+
+### 15.7.5.2 Setting the species to null
+
+If you set the species to null then the default constructor is used (which one that is depends on which variant of the species pattern is used, consult the previous sections for more information).
+
+          class MyArray3 extends Array {
+              static get [Symbol.species]() {
+                  return null;
+              }
+          }
+
+          const result3 = new MyArray3().map(x => x);
+          console.log(result3 instanceof Array); // true
+
+### 15.8 The pros and cons of classes
+
+Classes are controversial within the JavaScript community: On one hand, people coming from class-based languages are happy that they don’t have to deal with JavaScript’s unconventional inheritance mechanisms, anymore. On the other hand, there are many JavaScript programmers who argue that what’s complicated about JavaScript is not prototypal inheritance, but constructors.
+
+ES6 classes provide a few clear benefits:
+
+* They are backward-compatible with much of the current code.
+
+* Compared to constructors and constructor inheritance, classes make it easier for beginners to get started.
+
+* Subclassing is supported within the language.
+
+* Built-in constructors are subclassable.
+
+* No library for inheritance is needed, anymore; code will become more portable between frameworks.
+
+* They provide a foundation for advanced features in the future: traits (or mixins), immutable instances, etc.
+
+* They help tools that statically analyze code (IDEs, type checkers, style checkers, etc.).
+
+Let’s look at a few common complaints about ES6 classes. You will see me agree with most of them, but I also think that they benefits of classes much outweigh their disadvantages. I’m glad that they are in ES6 and I recommend to use them.
+
+### 15.8.1 Complaint: ES6 classes obscure the true nature of JavaScript inheritance
+
+Yes, ES6 classes do obscure the true nature of JavaScript inheritance. There is an unfortunate disconnect between what a class looks like (its syntax) and how it behaves (its semantics): It looks like an object, but it is a function. My preference would have been for classes to be constructor objects, not constructor functions. I explore that approach in the Proto.js project, via a tiny library (which proves how good a fit this approach is).
+
+However, backwards-compatibility matters, which is why classes being constructor functions also makes sense. That way, ES6 code and ES5 are more interoperable.
+
+
+The disconnect between syntax and semantics will cause some friction in ES6 and later. But you can lead a comfortable life by simply taking ES6 classes at face value. I don’t think the illusion will ever bite you. Newcomers can get started more quickly and later read up on what goes on behind the scenes (after they are more comfortable with the language).
+
+### 15.8.2 Complaint: Classes provide only single inheritance
+
+Classes only give you single inheritance, which severely limits your freedom of expression w.r.t. object-oriented design. However, the plan has always been for them to be the foundation of a multiple-inheritance mechanism such as traits.
+
+**traits.js: traits library for JavaScript**
+
+Check out traits.js if you are interested in how traits work (they are similar to mixins, which you may be familiar with).
+
+Then a class becomes an instantiable entity and a location where you assemble traits. Until that happens, you will need to resort to libraries if you want multiple inheritance.
+
+### 15.8.3 Complaint: Classes lock you in, due to mandatory new
+
+If you want to instantiate a class, you are forced to use new in ES6. That means that you can’t switch from a class to a factory function without changing the call sites. That is indeed a limitation, but there are two mitigating factors:
+
+* You can override the default result returned by the new operator, by returning an object from the constructor method of a class.
+
+* Due to its built-in modules and classes, ES6 makes it easier for IDEs to refactor code. Therefore, going from new to a function call will be simple. Obviously that doesn’t help you if you don’t control the code that calls your code, as is the case for libraries.
+
+Therefore, classes do somewhat limit you syntactically, but, once JavaScript has traits, they won’t limit you conceptually (w.r.t. object-oriented design).
+
+### 15.9 FAQ: classes
+
+### 15.9.1 Why can’t classes be function-called?
+
+Function-calling classes is currently forbidden. That was done to keep options open for the future, to eventually add a way to handle function calls via classes.
+
+### 15.9.2 How do I instantiate a class, given an Array of arguments?
+
+What is the analog of Function.prototype.apply() for classes? That is, if I have a class TheClass and an Array args of arguments, how do I instantiate TheClass?
+
+One way of doing so is via the spread operator (...):
+
+                function instantiate(TheClass, args) {
+                    return new TheClass(...args);
+                }
+                Another option is to use Reflect.construct():
+
+                function instantiate(TheClass, args) {
+                return Reflect.construct(TheClass, args);
+
+### 15.10 What is next for classes?
+
+The design motto for classes was “maximally minimal”. Several advanced features were discussed, but ultimately discarded in order to get a design that would be unanimously accepted by TC39.
+
+              Upcoming versions of ECMAScript can now extend this minimal design – classes will provide a foundation for features such as traits (or mixins), value objects (where different objects are equal if they have the same content) and const classes (that produce immutable instances).
