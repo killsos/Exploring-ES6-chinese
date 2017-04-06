@@ -323,3 +323,26 @@ You could also manually assign functions, but then you don’t have the nice met
           SomeClass.prototype.anotherMethod = function () {
               ···
           };
+
+### 14.3.1.2.4 Cloning objects
+
+One last use case for Object.assign() is a quick way of cloning objects:
+
+          function clone(orig) {
+              return Object.assign({}, orig);
+          }
+
+This way of cloning is also somewhat dirty, because it doesn’t preserve the property attributes of orig. If that is what you need, you have to use property descriptors.
+
+If you want the clone to have the same prototype as the original, you can use Object.getPrototypeOf() and Object.create():
+
+          function clone(orig) {
+              const origProto = Object.getPrototypeOf(orig);
+              return Object.assign(Object.create(origProto), orig);
+          }
+
+### 14.3.2 Object.getOwnPropertySymbols(obj)
+
+Object.getOwnPropertySymbols(obj) retrieves all own (non-inherited) symbol-valued property keys of obj.
+
+It complements **Object.getOwnPropertyNames()**, which retrieves all string-valued own property keys. Consult a later section for more details on traversing properties.
