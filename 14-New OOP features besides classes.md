@@ -638,6 +638,7 @@ None of these cases prevent Object.defineProperty() from creating an own propert
 Object.defineProperty()不受上面的限制来定义一个自有属性
 
 ### 14.5.1 Overriding inherited read-only properties
+### 重写继承的只读属性
 
 If an object obj inherits a property prop that is read-only then you can’t assign to that property:
 
@@ -648,7 +649,7 @@ If an object obj inherits a property prop that is read-only then you can’t ass
         });
 
         const obj = Object.create(proto);
-        
+
         obj.prop = 456;
         // TypeError: Cannot assign to read-only property
 
