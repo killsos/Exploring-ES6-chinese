@@ -642,6 +642,8 @@ Object.defineProperty()不受上面的限制来定义一个自有属性
 
 If an object obj inherits a property prop that is read-only then you can’t assign to that property:
 
+如果一个对象的一个继承属性是只读的 则该属性是不能进行赋值操作
+
         const proto = Object.defineProperty({}, 'prop', {
             writable: false,
             configurable: true,
@@ -654,13 +656,134 @@ If an object obj inherits a property prop that is read-only then you can’t ass
         // TypeError: Cannot assign to read-only property
 
 
-This is similar to how an inherited property works that has a getter, but no setter. It is in line with viewing assignment as changing the value of an inherited property. It does so non-destructively: the original is not modified, but overridden by a newly created own property. Therefore, an inherited read-only property and an inherited setter-less property both prevent changes via assignment. You can, however, force the creation of an own property by defining a property:
+This is similar to how an inherited property works that has a getter, but no setter.
 
-const proto = Object.defineProperty({}, 'prop', {
-    writable: false,
-    configurable: true,
-    value: 123,
-});
-const obj = Object.create(proto);
-Object.defineProperty(obj, 'prop', {value: 456});
-console.log(obj.prop); // 456
+如果一个继承属性只有getter没有setter其表现和上面类似
+
+It is in line with viewing assignment as changing the value of an inherited property.
+
+It does so non-destructively: the original is not modified, but overridden by a newly created own property.
+
+原来继承属性不修改 但是可以重新定义一个新的自有属性
+
+Therefore, an inherited read-only property and an inherited setter-less property both prevent changes via assignment.
+
+因而 一个只读继承属性和一个继承没有setter属性不允许进行复制操作
+
+You can, however, force the creation of an own property by defining a property:
+
+          const proto = Object.defineProperty({}, 'prop', {
+              writable: false,
+              configurable: true,
+              value: 123,
+          });
+
+          const obj = Object.create(proto);
+
+          Object.defineProperty(obj, 'prop', {value: 456});
+
+          console.log(obj.prop); // 456
+
+
+### 14.6 __proto__ in ECMAScript 6
+### ECMAScript 6的 __proto__
+
+The property __proto__ (pronounced “dunder proto”) has existed for a while in most JavaScript engines. This section explains how it worked prior to ECMAScript 6 and what changes with ECMAScript 6.
+
+dunder proto(笨重proto)在多数的JavaScript解析器已经存在
+
+For this section, it helps if you know what prototype chains are. Consult Sect. “Layer 2: The Prototype Relationship Between Objects” in “Speaking JavaScript”, if necessary.
+
+原型链
+
+### 14.6.1 __proto__ prior to ECMAScript 6
+
+### 14.6.1.1 Prototypes
+
+Each object in JavaScript starts a chain of one or more objects, a so-called prototype chain.
+
+Each object points to its successor, its prototype via the internal slot [[Prototype]] (which is null if there is no successor).
+
+That slot is called internal, because it only exists in the language specification and cannot be directly accessed from JavaScript.
+
+In ECMAScript 5, the standard way of getting the prototype p of an object obj is:
+
+**ECMAScript 5获得原型Object.getPrototypeOf()**
+
+        var p = Object.getPrototypeOf(obj);
+
+There is no standard way to change the prototype of an existing object, but you can create a new object obj that has the given prototype p:
+
+        var obj = Object.create(p);
+
+改变一个对象的原型方法Object.create()
+
+### 14.6.1.2 __proto__
+
+A long time ago, Firefox got the non-standard property __proto__. Other browsers eventually copied that feature, due to its popularity.
+
+很久之前 火狐添加一个非标准方法dunder proto方法 其他浏览器也复制因为这个属性流行
+
+Prior to ECMAScript 6, __proto__ worked in obscure ways:
+
+  * You could use it to get or set the prototype of any object:
+
+  __proto__可以设置/获得原型
+
+        var obj = {};
+        var p = {};
+
+        console.log(obj.__proto__ === p); // false
+        obj.__proto__ = p;
+        console.log(obj.__proto__ === p); // true
+
+  * However, it was never an actual property:
+
+  __proto__不是一个对象的实际属性
+
+        > var obj = {};
+        > '__proto__' in obj
+        false
+
+
+### 14.6.1.3 Subclassing Array via __proto__
+### 数组子类通过__proto__
+
+The main reason why __proto__ became popular was because it enabled the only way to create a subclass MyArray of Array in ES5: Array instances were exotic objects that couldn’t be created by ordinary constructors. Therefore, the following trick was used:
+
+        function MyArray() {
+            var instance = new Array(); // exotic object
+            instance.__proto__ = MyArray.prototype;
+            return instance;
+        }
+
+        MyArray.prototype = Object.create(Array.prototype);
+        MyArray.prototype.customMethod = function (···) { ··· };
+
+Subclassing in ES6 works differently than in ES5 and supports subclassing builtins out of the box.
+
+### 14.6.1.4 Why __proto__ is problematic in ES5
+
+The main problem is that __proto__ mixes two levels: the object level (normal properties, holding data) and the meta level.
+
+If you accidentally use __proto__ as a normal property (object level!), to store data, you get into trouble, because the two levels clash.
+
+The situation is compounded by the fact that you have to abuse objects as maps in ES5, because it has no built-in data structure for that purpose.
+
+Maps should be able to hold arbitrary keys, but you can’t use the key '__proto__' with objects-as-maps.
+
+In theory, one could fix the problem by using a symbol instead of the special name __proto__, but keeping meta-operations completely separate (as done via Object.getPrototypeOf()) is the best approach.
+
+### 14.6.2 The two kinds of __proto__ in ECMAScript 6
+
+Because __proto__ was so widely supported, it was decided that its behavior should be standardized for ECMAScript 6. However, due to its problematic nature, it was added as a deprecated feature. These features reside in Annex B in the ECMAScript specification, which is described as follows:
+
+The ECMAScript language syntax and semantics defined in this annex are required when the ECMAScript host is a web browser. The content of this annex is normative but optional if the ECMAScript host is not a web browser.
+
+JavaScript has several undesirable features that are required by a significant amount of code on the web. Therefore, web browsers must implement them, but other JavaScript engines don’t have to.
+
+In order to explain the magic behind __proto__, two mechanisms were introduced in ES6:
+
+1. **A getter and a setter implemented via Object.prototype.__proto__.**
+
+2. In an object literal, you can consider the property key '__proto__' a special operator for specifying the prototype of the created objects.
