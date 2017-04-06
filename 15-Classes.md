@@ -703,9 +703,279 @@ Pros:
 
 Cons:
 
-1. Code is not as elegant as a naming convention.
-2.Not safe: you can list all property keys (including symbols!) of an object via Reflect.ownKeys().
+1. Code is not as elegant as a naming convention
 
-### 15.3.5 Further reading 
+2. Not safe: you can list all property keys (including symbols!) of an object via Reflect.ownKeys().
+
+### 15.3.5 Further reading
 
 Sect. “Keeping Data Private” in “Speaking JavaScript” (covers ES5 techniques)
+
+
+### 15.4 Simple mixins
+
+Subclassing in JavaScript is used for two reasons:
+
+Interface inheritance: Every object that is an instance of a subclass (as tested by instanceof) is also an instance of the superclass.
+
+The expectation is that subclass instances behave like superclass instances, but may do more.
+
+Implementation inheritance: Superclasses pass on functionality to their subclasses.
+
+The usefulness of classes for implementation inheritance is limited, because they only support single inheritance (a class can have at most one superclass).
+
+Therefore, it is impossible to inherit tool methods from multiple sources – they must all come from the superclass.
+
+So how can we solve this problem? Let’s explore a solution via an example.
+
+Consider a management system for an enterprise where Employee is a subclass of Person.
+
+          class Person { ··· }
+          class Employee extends Person { ··· }
+
+Additionally, there are tool classes for storage and for data validation:
+
+        class Storage {
+            save(database) { ··· }
+        }
+        class Validation {
+            validate(schema) { ··· }
+        }
+
+It would be nice if we could include the tool classes like this:
+
+        // Invented ES6 syntax:
+        class Employee extends Storage, Validation, Person { ··· }
+
+**子类可以继承多个类**
+
+That is, we want Employee to be a subclass of Storage which should be a subclass of Validation which should be a subclass of Person.
+
+Employee and Person will only be used in one such chain of classes. But Storage and Validation will be used multiple times.
+
+We want them to be templates for classes whose superclasses we fill in. Such templates are called abstract subclasses or mixins.
+
+One way of implementing a mixin in ES6 is to view it as a function whose input is a superclass and whose output is a subclass extending that superclass:
+
+            const Storage = Sup => class extends Sup {
+                save(database) { ··· }
+            };
+            const Validation = Sup => class extends Sup {
+                validate(schema) { ··· }
+            };
+
+Here, we profit from the operand of the extends clause not being a fixed identifier, but an arbitrary expression. With these mixins, Employee is created like this:
+
+            class Employee extends Storage(Validation(Person)) { ··· }
+
+Acknowledgement. The first occurrence of this technique that I’m aware of is a Gist by Sebastian Markbåge.
+
+
+### 15.5 The details of classes
+
+What we have seen so far are the essentials of classes. You only need to read on if you are interested how things happen under the hood. Let’s start with the syntax of classes. The following is a slightly modified version of the syntax shown in Sect. A.4 of the ECMAScript 6 specification.
+
+          ClassDeclaration:
+              "class" BindingIdentifier ClassTail
+          ClassExpression:
+              "class" BindingIdentifier? ClassTail
+
+          ClassTail:
+              ClassHeritage? "{" ClassBody? "}"
+          ClassHeritage:
+              "extends" AssignmentExpression
+          ClassBody:
+              ClassElement+
+          ClassElement:
+              MethodDefinition
+              "static" MethodDefinition
+              ";"
+
+MethodDefinition:
+
+          PropName "(" FormalParams ")" "{" FuncBody "}"
+          "*" PropName "(" FormalParams ")" "{" GeneratorBody "}"
+          "get" PropName "(" ")" "{" FuncBody "}"
+          "set" PropName "(" PropSetParams ")" "{" FuncBody "}"
+
+PropertyName:
+
+          LiteralPropertyName
+          ComputedPropertyName
+
+LiteralPropertyName:
+
+          IdentifierName  /* foo */
+          StringLiteral   /* "foo" */
+          NumericLiteral  /* 123.45, 0xFF */
+
+
+ComputedPropertyName:
+
+    "[" Expression "]"
+
+Two observations:
+
+* The value to be extended can be produced by an arbitrary expression. Which means that you’ll be able to write code such as the following:
+
+        class Foo extends combine(MyMixin, MySuperClass) {}
+
+* Semicolons are allowed between methods.
+
+
+### 15.5.1 Various checks
+
+* Error checks: the class name cannot be eval or arguments; duplicate class element names are not allowed; the name constructor can only be used for a normal method, not for a getter, a setter or a generator method.
+
+* Classes can’t be function-called. They throw a TypeException if they are.
+
+* Prototype methods cannot be used as constructors:
+
+            class C {
+                m() {}
+            }
+            new C.prototype.m(); // TypeError
+
+### 15.5.2 Attributes of properties
+
+Class declarations create (mutable) let bindings. The following table describes the attributes of properties related to a given class Foo:
+
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>writable</th>
+      <th>enumerable</th>
+      <th>configurable</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Static properties <code>Foo.*</code>
+</td>
+      <td><code>true</code></td>
+      <td><code>false</code></td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>Foo.prototype</code></td>
+      <td><code>false</code></td>
+      <td><code>false</code></td>
+      <td><code>false</code></td>
+    </tr>
+    <tr>
+      <td><code>Foo.prototype.constructor</code></td>
+      <td><code>false</code></td>
+      <td><code>false</code></td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td>Prototype properties <code>Foo.prototype.*</code>
+</td>
+      <td><code>true</code></td>
+      <td><code>false</code></td>
+      <td><code>true</code></td>
+    </tr>
+  </tbody>
+
+</table>
+
+Notes:
+
+1. Many properties are writable, to allow for dynamic patching.
+
+2. A constructor and the object in its property prototype have an immutable bidirectional link.
+
+3. Method definitions in object literals produce enumerable properties.
+
+15.5.3 Classes have inner names
+
+Classes have lexical inner names, just like named function expressions.
+
+### 15.5.3.1 The inner names of named function expressions
+
+You may know that named function expressions have lexical inner names:
+
+          const fac = function me(n) {
+              if (n > 0) {
+                  // Use inner name `me` to
+                  // refer to function
+                  return n * me(n-1);
+              } else {
+                  return 1;
+              }
+          };
+          console.log(fac(3)); // 6
+
+The name me of the named function expression becomes a lexically bound variable that is unaffected by which variable currently holds the function.
+
+
+### 15.5.3.2 The inner names of classes
+
+Interestingly, ES6 classes also have lexical inner names that you can use in methods (constructor methods and regular methods):
+
+        class C {
+            constructor() {
+                // Use inner name C to refer to class
+                console.log(`constructor: ${C.prop}`);
+            }
+            logProp() {
+                // Use inner name C to refer to class
+                console.log(`logProp: ${C.prop}`);
+            }
+        }
+        C.prop = 'Hi!';
+
+        const D = C;
+        C = null;
+
+        // C is not a class, anymore:
+        new C().logProp();
+        // TypeError: C is not a function
+
+        // But inside the class, the identifier C
+        // still works
+        new D().logProp();
+        // constructor: Hi!
+        // logProp: Hi!
+
+**Acknowledgement: Thanks to Michael Ficarra for pointing out that classes have inner names.**
+
+15.6 The details of subclassing
+
+In ECMAScript 6, subclassing looks as follows.
+
+          class Person {
+              constructor(name) {
+                  this.name = name;
+              }
+              toString() {
+                  return `Person named ${this.name}`;
+              }
+              static logNames(persons) {
+                  for (const person of persons) {
+                      console.log(person.name);
+                  }
+              }
+          }
+
+          class Employee extends Person {
+              constructor(name, title) {
+                  super(name);
+                  this.title = title;
+              }
+              toString() {
+                  return `${super.toString()} (${this.title})`;
+              }
+          }
+
+          const jane = new Employee('Jane', 'CTO');
+          console.log(jane.toString()); // Person named Jane (CTO)
+
+The next section examines the structure of the objects that were created by the previous example. The section after that examines how jane is allocated and initialized.
+
+### 15.6.1 Prototype chains
+
+The previous example creates the following objects.
+
+<img src="./classes----subclassing_es6_150dpi.png" />
