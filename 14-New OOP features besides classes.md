@@ -445,7 +445,7 @@ In ECMAScript 6, the key of a property can be either a string or a symbol. The f
 
 ECMAScript 6的属性名字可以是字符串或symbol. 下面5种遍历对象的属性名字操作
 
-  1. Object.keys(obj) : Array<string>
+1. Object.keys(obj) : Array<string>
 
   Object.keys(obj) 返回字符串数组
 
@@ -453,7 +453,7 @@ retrieves all string keys of all enumerable own (non-inherited) properties.
 
 返回可枚举非继承字符串属性名
 
-  2. Object.getOwnPropertyNames(obj) : Array<string>
+2. Object.getOwnPropertyNames(obj) : Array<string>
 
   Object.getOwnPropertyNames(obj) 返回字符串数组
 
@@ -461,7 +461,7 @@ retrieves all string keys of all own properties.
 
 遍历所有自己的字符串属性名字
 
-  3. Object.getOwnPropertySymbols(obj) : Array<symbol>
+3. Object.getOwnPropertySymbols(obj) : Array<symbol>
 
   Object.getOwnPropertySymbols 返回symbol数组
 
@@ -469,7 +469,7 @@ retrieves all symbol keys of all own properties.
 
 返回自己的symbol的属性
 
-  4. Reflect.ownKeys(obj) : Array<string|symbol>
+4. Reflect.ownKeys(obj) : Array<string|symbol>
 
   返回对象的字符串或symbol的属性名字
 
@@ -477,7 +477,7 @@ retrieves all keys of all own properties.
 
 返回对象所有属性名字
 
-  5. for (const key in obj)
+5. for (const key in obj)
 
 retrieves all string keys of all enumerable properties (inherited and own).
 
