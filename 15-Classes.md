@@ -216,3 +216,317 @@ The object diagram for this class declaration looks as follows. Tip for understa
 The property prototype is only special w.r.t. the new operator using its value as the prototype for instances it creates.
 
 <img src="./classes----methods_150dpi.png" />
+
+**First, the pseudo-method constructor. **
+
+This method is special, as it defines the function that represents the class:
+
+      > Foo === Foo.prototype.constructor
+      true
+      > typeof Foo
+      'function'
+
+It is sometimes called a class constructor. It has features that normal constructor functions don’t have (mainly the ability to constructor-call its superconstructor via super(), which is explained later).
+
+**Second, static methods. **
+
+Static properties (or class properties) are properties of Foo itself. If you prefix a method definition with static, you create a class method:
+
+        > typeof Foo.staticMethod
+        'function'
+        > Foo.staticMethod()
+        'classy'
+
+**Third, prototype methods. **
+
+The prototype properties of Foo are the properties of Foo.prototype. They are usually methods and inherited by instances of Foo.
+
+        > typeof Foo.prototype.prototypeMethod
+        'function'
+        > foo.prototypeMethod()
+        'prototypical'
+
+### 15.2.2.2 Static data properties
+
+For the sake of finishing ES6 classes in time, they were deliberately designed to be “maximally minimal”. That’s why you can currently only create static methods, getters, and setters, but not static data properties. There is a proposal for adding them to the language. Until that proposal is accepted, there are two work-arounds that you can use.
+
+First, you can manually add a static property:
+
+            class Point {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                }
+            }
+
+            Point.ZERO = new Point(0, 0);
+
+You could use Object.defineProperty() to create a read-only property, but I like the simplicity of an assignment.
+
+Second, you can create a static getter:
+
+        class Point {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+            static get ZERO() {
+                return new Point(0, 0);
+            }
+        }
+
+In both cases, you get a property Point.ZERO that you can read. In the first case, the same instance is returned every time. In the second case, a new instance is returned every time.
+
+### 15.2.2.3 Getters and setters
+
+The syntax for getters and setters is just like in ECMAScript 5 object literals:
+
+        class MyClass {
+            get prop() {
+                return 'getter';
+            }
+            set prop(value) {
+                console.log('setter: '+value);
+            }
+        }
+
+You use MyClass as follows.
+
+        > const inst = new MyClass();
+        > inst.prop = 123;
+        setter: 123
+        > inst.prop
+        'getter'
+
+### 15.2.2.4 Computed method names
+
+You can define the name of a method via an expression, if you put it in square brackets. For example, the following ways of defining Foo are all equivalent.
+
+        class Foo {
+            myMethod() {}
+        }
+
+        class Foo {
+            ['my'+'Method']() {}
+        }
+
+        const m = 'myMethod';
+        class Foo {
+            [m]() {}
+        }
+
+Several special methods in ECMAScript 6 have keys that are symbols.
+
+Computed method names allow you to define such methods.
+
+For example, if an object has a method whose key is Symbol.iterator, it is iterable.
+
+That means that its contents can be iterated over by the for-of loop and other language mechanisms.
+
+        class IterableClass {
+            [Symbol.iterator]() {
+                ···
+            }
+        }
+
+### 15.2.2.5 Generator methods
+
+If you prefix a method definition with an asterisk (*), it becomes a generator method. Among other things, a generator is useful for defining the method whose key is Symbol.iterator. The following code demonstrates how that works.
+
+        class IterableArguments {
+            constructor(...args) {
+                this.args = args;
+            }
+            * [Symbol.iterator]() {
+                for (const arg of this.args) {
+                    yield arg;
+                }
+            }
+        }
+
+        for (const x of new IterableArguments('hello', 'world')) {
+            console.log(x);
+        }
+
+        // Output:
+        // hello
+        // world
+
+### 15.2.3 Subclassing
+
+The extends clause lets you create a subclass of an existing constructor (which may or may not have been defined via a class):
+
+              class Point {
+                  constructor(x, y) {
+                      this.x = x;
+                      this.y = y;
+                  }
+                  toString() {
+                      return `(${this.x}, ${this.y})`;
+                  }
+              }
+
+              class ColorPoint extends Point {
+                  constructor(x, y, color) {
+                      super(x, y); // (A)
+                      this.color = color;
+                  }
+                  toString() {
+                      return super.toString() + ' in ' + this.color; // (B)
+                  }
+              }
+
+Again, this class is used like you’d expect:
+
+              > const cp = new ColorPoint(25, 8, 'green');
+              > cp.toString()
+              '(25, 8) in green'
+
+              > cp instanceof ColorPoint
+              true
+              > cp instanceof Point
+              true
+
+There are two kinds of classes:
+
+* Point is a base class, because it doesn’t have an extends clause.
+* ColorPoint is a derived class.
+
+There are two ways of using super:
+
+* A class constructor (the pseudo-method constructor in a class definition) uses it like a function call (super(···)), in order to make a superconstructor call (line A).
+
+* Method definitions (in object literals or classes, with or without static) use it like property references (super.prop) or method calls (super.method(···)), in order to refer to superproperties (line B)
+
+
+
+### 15.2.3.1 The prototype of a subclass is the superclass
+
+The prototype of a subclass is the superclass in ECMAScript 6:
+
+          > Object.getPrototypeOf(ColorPoint) === Point
+          true
+
+That means that static properties are inherited:
+
+**静态属性/方法也会被继承**
+
+          class Foo {
+              static classMethod() {
+                  return 'hello';
+              }
+          }
+
+          class Bar extends Foo {
+          }
+          Bar.classMethod(); // 'hello'
+
+You can even super-call static methods:
+
+          class Foo {
+              static classMethod() {
+                  return 'hello';
+              }
+          }
+
+          class Bar extends Foo {
+              static classMethod() {
+                  return super.classMethod() + ', too';
+              }
+          }
+          Bar.classMethod(); // 'hello, too'
+
+### 15.2.3.2 Superconstructor calls
+
+In a derived class, you must call super() before you can use this:
+
+在子类中使用this前 必须调用super()
+
+              class Foo {}
+
+              class Bar extends Foo {
+                  constructor(num) {
+                      const tmp = num * 2; // OK
+                      this.num = num; // ReferenceError
+                      super();
+                      this.num = num; // OK
+                  }
+              }
+
+Implicitly leaving a derived constructor without calling super() also causes an error:
+
+如果子类中没有调用super() 会抛出ReferenceError
+
+          class Foo {}
+
+          class Bar extends Foo {
+              constructor() {
+              }
+          }
+
+          const bar = new Bar(); // ReferenceError
+
+### 15.2.3.3 Overriding the result of a constructor
+
+Just like in ES5, you can override the result of a constructor by explicitly returning an object:
+
+          class Foo {
+              constructor() {
+                  return Object.create(null);
+              }
+          }
+          console.log(new Foo() instanceof Foo); // false
+
+If you do so, it doesn’t matter whether this has been initialized or not.
+
+In other words: you don’t have to call super() in a derived constructor if you override the result in this manner.
+
+### 15.2.3.4 Default constructors for classes
+
+If you don’t specify a constructor for a base class, the following definition is used:
+
+        constructor() {}
+
+For derived classes, the following default constructor is used:
+
+        constructor(...args) {
+            super(...args);
+        }
+
+### 15.2.3.5 Subclassing built-in constructors
+
+In ECMAScript 6, you can finally subclass all built-in constructors (there are work-arounds for ES5, but these have significant limitations).
+
+For example, you can now create your own exception classes (that will inherit the feature of having a stack trace in most engines):
+
+            class MyError extends Error {
+            }
+            throw new MyError('Something happened!');
+
+You can also create subclasses of Array whose instances properly handle length:
+
+            class Stack extends Array {
+                get top() {
+                    return this[this.length - 1];
+                }
+            }
+
+            var stack = new Stack();
+            stack.push('world');
+            stack.push('hello');
+            console.log(stack.top); // hello
+            console.log(stack.length); // 2
+
+Note that subclassing Array is usually not the best solution. It’s often better to create your own class (whose interface you control) and to delegate to an Array in a private property.
+
+### 5.3 Private data for classes
+### 类中私有数据
+
+This section explains four approaches for managing private data for ES6 classes:
+
+1. Keeping private data in the environment of a class constructor
+2. Marking private properties via a naming convention (e.g. a prefixed underscore)
+3. Keeping private data in WeakMaps
+4. Using symbols as keys for private properties
+
+Approaches #1 and #2 were already common in ES5, for constructors. Approaches #3 and #4 are new in ES6. Let’s implement the same example four times, via each of the approaches.
