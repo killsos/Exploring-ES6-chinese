@@ -534,13 +534,132 @@ ES5添加Object.keys方法 并且要为了替换带for-in
 During development of both ES5 and ES6, the possibility of defining a specific for-in order was considered but not adopted because of web legacy compatibility concerns and uncertainty about the willingness of browsers to make changes in the ordering they currently produce.
 
 ### 14.4.2.1 Integer indices
+### 数字索引
 
 Many engines treat integer indices specially, even though they are still strings (at least as far as the ES6 spec is concerned). Therefore, it makes sense to treat them as a separate category of keys.
 
+很多解析器对待数字索引很特别 尽管依然是字符串到ES6为止依然这么认为  
+
 Roughly, an integer index is a string that, if converted to a 53-bit non-negative integer and back is the same value. Therefore:
 
-  * '10' and '2' are integer indices.
-  * '02' is not an integer index. Converting it to an integer and back results in the different string '2'.
-  * '3.141' is not an integer index, because 3.141 is not an integer.
-  
-In ES6, instances of String and Typed Arrays have integer indices. The indices of normal Arrays are a subset of integer indices: they have a smaller range of 32 bits. For more information on Array indices, consult “Array Indices in Detail” in “Speaking JavaScript”.
+  * '10' and '2' are integer indices. 整数索引
+  * '02' is not an integer index. Converting it to an integer and back results in the different string '2'. 02不是索引
+  * '3.141' is not an integer index, because 3.141 is not an integer. '3.141'不是数字索引 因为'3.141'不是整数
+
+In ES6, instances of String and Typed Arrays have integer indices. The indices of normal Arrays are a subset of integer indices: they have a smaller range of 32 bits. For more information on [Array indices](http://speakingjs.com/es5/ch18.html#_array_indices_in_detail), consult “Array Indices in Detail” in “Speaking JavaScript”.
+
+在ES6中字符串和Typed Arrays也有整数索引 数组的索引是一系列整数 范围小于32位
+
+Integer indices have a 53-bit range, because thats the largest range of integers that JavaScript can handle. For details, see Sect. [“Safe integers”.](http://exploringjs.com/es6/ch_numbers.html#sec_safe-integers)
+
+### 14.4.2.2 Example
+
+The following code demonstrates the traversal order “Own Property Keys”:
+
+        const obj = {
+            [Symbol('first')]: true,
+            '02': true,
+            '10': true,
+            '01': true,
+            '2': true,
+            [Symbol('second')]: true,
+        };
+
+        Reflect.ownKeys(obj);
+            // [ '2', '10', '02', '01',
+            //   Symbol('first'), Symbol('second') ]
+
+Explanation:
+
+'2' and '10' are integer indices, come first and are sorted numerically (not in the order in which they were added).
+
+整数索引首先出现并且按照数字大小排序
+
+'02' and '01' are normal string keys, come next and appear in the order in which they were added to obj.
+
+接着是字符串属性
+
+Symbol('first') and Symbol('second') are symbols and come last, in the order in which they were added to obj.
+
+Symbol属性最后出现
+
+
+### 14.4.2.3 Why does the spec standardize in which order property keys are returned?
+### 属性返回的标准的原因
+
+[Answer by Tab Atkins Jr.:](https://esdiscuss.org/topic/nailing-object-property-order)
+
+Because, for objects at least, all implementations used approximately the same order (matching the current spec), and lots of code was inadvertently written that depended on that ordering, and would break if you enumerated it in a different order. Since browsers have to implement this particular ordering to be web-compatible, it was specced as a requirement.
+
+There was some discussion about breaking from this in Maps/Sets, but doing so would require us to specify an order that is impossible for code to depend on; in other words, we’d have to mandate that the ordering be random, not just unspecified. This was deemed too much effort, and creation-order is reasonable valuable (see OrderedDict in Python, for example), so it was decided to have Maps and Sets match Objects.
+
+### 14.4.2.4 The order of properties in the spec
+
+The following parts of the spec are relevant for this section:
+
+* The section on Array exotic objects has a note on what Array indices are.
+
+* The internal method [[OwnPropertyKeys]] is used by Reflect.ownKeys() and others.
+
+* 返回对象的自己属性名通过用Reflect.ownKeys()
+
+* The operation EnumerableOwnNames is used by Object.keys() and others.
+
+* 返回对象的自己枚举属性名通过用Object.keys()
+
+* The internal method [[Enumerate]] is used by for-in.
+
+* 内部方法可枚举的通过for-in
+
+### 14.5 Assigning versus defining properties
+### 分配与定义属性
+
+There are two similar ways of adding a property prop to an object obj:
+
+        Assigning: obj.prop = 123
+        Defining: Object.defineProperty(obj, 'prop', 123)
+
+There are three cases in which assigning does not create an own property prop, even if it doesn’t exist, yet:
+
+* A read-only property prop exists in the prototype chain. Then the assignment causes a TypeError in strict mode.
+
+原型链中的只读属性 在严格模式赋值就会引起TypeError
+
+* A setter for prop exists in the prototype chain. Then that setter is called.
+
+原型链中的setter属性 这样就可以调用
+
+* A getter for prop without a setter exists in the prototype chain. Then a TypeError is thrown in strict mode. This case is similar to the first one.
+
+如果getter属性但没有setter 在严格模式会引起TypeError
+
+None of these cases prevent Object.defineProperty() from creating an own property. The next section looks at case #3 in more detail.
+
+Object.defineProperty()不受上面的限制来定义一个自有属性
+
+### 14.5.1 Overriding inherited read-only properties
+
+If an object obj inherits a property prop that is read-only then you can’t assign to that property:
+
+        const proto = Object.defineProperty({}, 'prop', {
+            writable: false,
+            configurable: true,
+            value: 123,
+        });
+
+        const obj = Object.create(proto);
+        
+        obj.prop = 456;
+        // TypeError: Cannot assign to read-only property
+
+
+This is similar to how an inherited property works that has a getter, but no setter. It is in line with viewing assignment as changing the value of an inherited property. It does so non-destructively: the original is not modified, but overridden by a newly created own property. Therefore, an inherited read-only property and an inherited setter-less property both prevent changes via assignment. You can, however, force the creation of an own property by defining a property:
+
+const proto = Object.defineProperty({}, 'prop', {
+    writable: false,
+    configurable: true,
+    value: 123,
+});
+const obj = Object.create(proto);
+Object.defineProperty(obj, 'prop', {value: 456});
+console.log(obj.prop); // 456
