@@ -346,3 +346,139 @@ If you want the clone to have the same prototype as the original, you can use Ob
 Object.getOwnPropertySymbols(obj) retrieves all own (non-inherited) symbol-valued property keys of obj.
 
 It complements **Object.getOwnPropertyNames()**, which retrieves all string-valued own property keys. Consult a later section for more details on traversing properties.
+
+
+### 14.3.3 Object.is(value1, value2)
+
+The strict equals operator (===) treats two values differently than one might expect.
+
+绝对等于
+
+First, NaN is not equal to itself.
+
+首先 NaN 不等于自己
+
+        > NaN === NaN
+        false
+
+That is unfortunate, because it often prevents us from detecting NaN:
+
+这也是不能检查NaN的原因
+
+          > [0,NaN,2].indexOf(NaN)
+          -1
+
+Second, JavaScript has two zeros, but strict equals treats them as if they were the same value:
+
+JavaScript有两个零 -0 +0 但是绝对相等对于这两个值是相等的
+
+          > -0 === +0
+          true
+
+Doing this is normally a good thing.
+
+Object.is() provides a way of comparing values that is a bit more precise than ===. It works as follows:
+
+Object.is()与===简洁版 只有下面两个是不同
+
+          > Object.is(NaN, NaN)
+          true
+
+          > Object.is(-0, +0)
+          false
+
+
+Everything else is compared as with ===.
+
+其他与===相同的
+
+### 14.3.3.1 Using Object.is() to find Array elements
+### Object.is()发现数组元素
+
+If we combine Object.is() with the new ES6 Array method findIndex(), we can find NaN in Arrays:
+
+Object.is()与数组的findIndex()的方法 可以发现数组中NaN元素
+
+          function myIndexOf(arr, elem) {
+
+              return arr.findIndex(x => Object.is(x, elem));
+          }
+
+          myIndexOf([0,NaN,2], NaN); // 1
+
+In contrast, indexOf() does not handle NaN well:
+
+相反 indexOf()不能好的处理
+
+          > [0,NaN,2].indexOf(NaN)
+          -1
+
+
+### 14.3.4 Object.setPrototypeOf(obj, proto)
+
+This method sets the prototype of obj to proto.
+
+设置对象的原型
+
+The non-standard way of doing so in ECMAScript 5, that is supported by many engines, is via assigning to the special property __proto__.
+
+在ECMAScript 5有非标准方法通过设置__proto__属性来完成
+
+The recommended way of setting the prototype remains the same as in ECMAScript 5: during the creation of an object, via Object.create().
+
+ECMAScript 5通过设置Object.create()原型
+
+That will always be faster than first creating an object and then setting its prototype. Obviously, it doesn’t work if you want to change the prototype of an existing object.
+
+这是更快创建一个对象并同时设置原型 如果你想改变已经存在的对象的原型就可以不进行设置
+
+        Object.create(proto[, propertiesObject])
+
+
+### 14.4 Traversing properties in ES6
+### ES6的遍历属性
+
+### 14.4.1 Five operations that traverse properties
+### 5种遍历属性方法
+
+In ECMAScript 6, the key of a property can be either a string or a symbol. The following are five operations that traverse the property keys of an object obj:
+
+ECMAScript 6的属性名字可以是字符串或symbol. 下面5种遍历对象的属性名字操作
+
+  1. Object.keys(obj) : Array<string>
+
+  Object.keys(obj) 返回字符串数组
+
+retrieves all string keys of all enumerable own (non-inherited) properties.
+
+返回可枚举非继承字符串属性名
+
+  2. Object.getOwnPropertyNames(obj) : Array<string>
+
+  Object.getOwnPropertyNames(obj) 返回字符串数组
+
+retrieves all string keys of all own properties.
+
+遍历所有自己的字符串属性名字
+
+  3. Object.getOwnPropertySymbols(obj) : Array<symbol>
+
+  Object.getOwnPropertySymbols 返回symbol数组
+
+retrieves all symbol keys of all own properties.
+
+返回自己的symbol的属性
+
+  4. Reflect.ownKeys(obj) : Array<string|symbol>
+
+  返回对象的字符串或symbol的属性名字
+
+retrieves all keys of all own properties.
+
+返回对象所有属性名字
+
+  5. for (const key in obj)
+
+retrieves all string keys of all enumerable properties (inherited and own).
+
+返回所有可枚举的无论继承还是自己的字符串属性名字
