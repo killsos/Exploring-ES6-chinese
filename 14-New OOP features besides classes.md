@@ -487,23 +487,60 @@ retrieves all string keys of all enumerable properties (inherited and own).
 
 ES6 defines two traversal orders for properties.
 
+ES6定义两种遍历属性的次序
+
 **Own Property Keys**:
+**自己属性名字**
 
 * Retrieves the keys of all own properties of an object, in the following order:
+* 遍历一个对象所有属性的下面步骤
 
   * First, the string keys that are integer indices (what these are is explained in the next section), in ascending numeric order.
 
+  * 首先 字符串名字如果是数字索引是按照数字升序
+
   * Then all other string keys, in the order in which they were added to the object.
+
+  * 然后再是字符串属性
 
   * Lastly, all symbol keys, in the order in which they were added to the object.
 
+  * 最后是symbol属性
+
 * Used by: Object.assign(), Object.defineProperties(), Object.getOwnPropertyNames(), Object.getOwnPropertySymbols(), Reflect.ownKeys()
 
+* 通过Object.assign(), Object.defineProperties(), Object.getOwnPropertyNames(), Object.getOwnPropertySymbols(), Reflect.ownKeys() 这些方法来实现
+
 **Enumerable Own Names:**
+**自己枚举属性名**
 
 * Retrieves the string keys of all enumerable own properties of an object. The order is not defined by ES6, but it must be the same order in which for-in traverses properties.
 
+* 遍历所有枚举字符串属性这个在ES6没有定义 必须通过for-in遍历
+
 * Used by: JSON.parse(), JSON.stringify(), Object.keys()
+
+
 The order in which for-in traverses properties is not defined. [Quoting Allen Wirfs-Brock](https://mail.mozilla.org/pipermail/es-discuss/2015-August/043998.html):
 
-Historically, the for-in order was not defined and there has been variation among browser implementations in the order they produce (and other specifics). ES5 added Object.keys and the requirement that it should order the keys identically to for-in. During development of both ES5 and ES6, the possibility of defining a specific for-in order was considered but not adopted because of web legacy compatibility concerns and uncertainty about the willingness of browsers to make changes in the ordering they currently produce.
+Historically, the for-in order was not defined and there has been variation among browser implementations in the order they produce (and other specifics).
+
+在历史for-in没有定义 客户端也没有实现这个遍历结果
+
+ES5 added Object.keys and the requirement that it should order the keys identically to for-in.
+
+ES5添加Object.keys方法 并且要为了替换带for-in
+
+During development of both ES5 and ES6, the possibility of defining a specific for-in order was considered but not adopted because of web legacy compatibility concerns and uncertainty about the willingness of browsers to make changes in the ordering they currently produce.
+
+### 14.4.2.1 Integer indices
+
+Many engines treat integer indices specially, even though they are still strings (at least as far as the ES6 spec is concerned). Therefore, it makes sense to treat them as a separate category of keys.
+
+Roughly, an integer index is a string that, if converted to a 53-bit non-negative integer and back is the same value. Therefore:
+
+  * '10' and '2' are integer indices.
+  * '02' is not an integer index. Converting it to an integer and back results in the different string '2'.
+  * '3.141' is not an integer index, because 3.141 is not an integer.
+  
+In ES6, instances of String and Typed Arrays have integer indices. The indices of normal Arrays are a subset of integer indices: they have a smaller range of 32 bits. For more information on Array indices, consult “Array Indices in Detail” in “Speaking JavaScript”.
