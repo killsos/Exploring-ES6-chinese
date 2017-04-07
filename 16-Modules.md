@@ -877,3 +877,148 @@ This is an overview of the differences, details are explained later:
   </tbody>
 
 </table>
+
+### 16.6.1.1 Scripts
+
+Scripts are the traditional browser way to embed JavaScript and to refer to external JavaScript files. Scripts have an internet media type that is used as:
+
+* The content type of JavaScript files delivered via a web server.
+
+* The value of the attribute type of <script> elements.
+
+* Note that for HTML5, the recommendation is to omit the type attribute in <script> elements if they contain or refer to JavaScript.
+
+The following are the most important values:
+
+* text/javascript: is a legacy value and used as the default if you omit the type attribute in a script tag. It is the safest choice for Internet Explorer 8 and earlier.
+
+* text/javascript是IE8及其以前
+
+* application/javascript: is recommended for current browsers.
+
+* application/javascript是现代浏览器
+
+Scripts are normally loaded or executed synchronously. The JavaScript thread stops until the code has been loaded or executed.
+
+
+### 16.6.1.2 Modules
+
+To be in line with JavaScript’s usual run-to-completion semantics, the body of a module must be executed without interruption. That leaves two options for importing modules:
+
+1. Load modules synchronously, while the body is executed. That is what Node.js does.
+
+2. Load all modules asynchronously, before the body is executed. That is how AMD modules are handled. It is the best option for browsers, because modules are loaded over the internet and execution doesn’t have to pause while they are. As an added benefit, this approach allows one to load multiple modules in parallel.
+
+ECMAScript 6 gives you the best of both worlds: The synchronous syntax of Node.js plus the asynchronous loading of AMD.
+
+To make both possible, ES6 modules are syntactically less flexible than Node.js modules: Imports and exports must happen at the top level.
+
+That means that they can’t be conditional, either. This restriction allows an ES6 module loader to analyze statically what modules are imported by a module and load them before executing its body.
+
+The synchronous nature of scripts prevents them from becoming modules. Scripts cannot even import modules declaratively (you have to use the programmatic module loader API if you want to do so).
+
+Modules can be used from browsers via a new variant of the <script> element that is completely asynchronous:
+
+          <script type="module">
+              import $ from 'lib/jquery';
+              var x = 123;
+
+              // The current scope is not global
+              console.log('$' in window); // false
+              console.log('x' in window); // false
+
+              // `this` still refers to the global object
+              console.log(this === window); // true
+          </script>
+
+As you can see, the element has its own scope and variables “inside” it are local to that scope. Note that module code is implicitly in strict mode. This is great news – no more 'use strict'.
+
+Similar to normal <script> elements, <script type="module"> can also be used to load external modules. For example, the following tag starts a web application via a main module (the attribute name import is my invention, it isn’t yet clear what name will be used).
+
+          <script type="module" import="impl/main"></script>
+
+The advantage of supporting modules in HTML via a custom <script> type is that it is easy to bring that support to older engines via a polyfill (a library). There may or may not eventually be a dedicated element for modules (e.g. <module>).
+
+
+### 16.6.1.3 Module or script – a matter of context
+
+Whether a file is a module or a script is only determined by how it is imported or loaded.
+
+Most modules have either imports or exports and can thus be detected.
+
+But if a module has neither then it is indistinguishable from a script. For example:
+
+            var x = 123;
+
+The semantics of this piece of code differs depending on whether it is interpreted as a module or as a script:
+
+* As a module, the variable x is created in module scope.
+
+* As a script, the variable x becomes a global variable and a property of the global object (window in browsers).
+
+More realistic example is a module that installs something, e.g. a polyfill in global variables or a global event listener. Such a module neither imports nor exports anything and is activated via an empty import:
+
+          import './my_module';
+
+**Sources of this section**
+
+1. [“Modules: Status Update”,](https://github.com/rwaldron/tc39-notes/blob/master/es6/2013-09/modules.pdf) slides by David Herman.
+
+2. [“Modules vs Scripts”,](https://mail.mozilla.org/pipermail/es-discuss/2013-November/034869.html) an email by David Herman.
+
+### 16.7 Details: imports as views on exports
+
+The code in this section is available [on GitHub.](https://github.com/rauschma/imports-are-views-demo)
+
+Imports work differently in CommonJS and ES6:
+
+* In CommonJS, imports are copies of exported values.
+
+* In ES6, imports are live read-only views on exported values.
+
+The following sections explain what that means.
+
+### 16.7.1 In CommonJS, imports are copies of exported values
+
+With CommonJS (Node.js) modules, things work in relatively familiar ways.
+
+If you import a value into a variable, the value is copied twice: once when it is exported (line A) and once it is imported (line B).
+
+        //------ lib.js ------
+        var counter = 3;
+        function incCounter() {
+            counter++;
+        }
+        module.exports = {
+            counter: counter, // (A)
+            incCounter: incCounter,
+        };
+
+        //------ main1.js ------
+        var counter = require('./lib').counter; // (B)
+        var incCounter = require('./lib').incCounter;
+
+        // The imported value is a (disconnected) copy of a copy
+        console.log(counter); // 3
+        incCounter();
+        console.log(counter); // 3
+
+        // The imported value can be changed
+        counter++;
+        console.log(counter); // 4
+
+If you access the value via the exports object, it is still copied once, on export:
+
+//------ main2.js ------
+var lib = require('./lib');
+
+// The imported value is a (disconnected) copy
+console.log(lib.counter); // 3
+lib.incCounter();
+console.log(lib.counter); // 3
+
+// The imported value can be changed
+lib.counter++;
+console.log(lib.counter); // 4
+
+### 16.7.2 **In ES6, imports are live read-only views on exported values**
