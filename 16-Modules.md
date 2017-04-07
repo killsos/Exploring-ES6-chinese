@@ -47,3 +47,113 @@
 * 16.10. Advantages of ECMAScript 6 modules
 * 16.11. Further reading
 ---
+
+### 16.1 Overview
+
+JavaScript has had modules for a long time. However, they were implemented via libraries, not built into the language. ES6 is the first time that JavaScript has built-in modules.
+
+ES6 modules are stored in files. There is exactly one module per file and one file per module. You have two ways of exporting things from a module.
+
+These two ways can be mixed, but it is usually better to use them separately.
+
+### 16.1.1 Multiple named exports
+
+There can be multiple named exports:
+
+        //------ lib.js ------
+        export const sqrt = Math.sqrt;
+        export function square(x) {
+            return x * x;
+        }
+        export function diag(x, y) {
+            return sqrt(square(x) + square(y));
+        }
+
+        //------ main.js ------
+        import { square, diag } from 'lib';
+        console.log(square(11)); // 121
+        console.log(diag(4, 3)); // 5
+
+You can also import the complete module:
+
+        //------ main.js ------
+        import * as lib from 'lib';
+        console.log(lib.square(11)); // 121
+        console.log(lib.diag(4, 3)); // 5
+
+### 16.1.2 Single default export
+
+There can be a single default export. For example, a function:
+
+        //------ myFunc.js ------
+        export default function () { ··· } // no semicolon!
+
+        //------ main1.js ------
+        import myFunc from 'myFunc';
+        myFunc();
+
+        Or a class:
+
+        //------ MyClass.js ------
+        export default class { ··· } // no semicolon!
+
+        //------ main2.js ------
+        import MyClass from 'MyClass';
+        const inst = new MyClass();
+
+Note that there is no semicolon at the end if you default-export a function or a class (which are anonymous declarations).
+
+### 16.1.3 Browsers: scripts versus modules
+
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Scripts</th>
+      <th>Modules</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>HTML element</td>
+      <td><code>&lt;script&gt;</code></td>
+      <td><code>&lt;script type="module"&gt;</code></td>
+    </tr>
+    <tr>
+      <td>Default mode</td>
+      <td>non-strict</td>
+      <td>strict</td>
+    </tr>
+    <tr>
+      <td>Top-level variables are</td>
+      <td>global</td>
+      <td>local to module</td>
+    </tr>
+    <tr>
+      <td>Value of <code>this</code> at top level</td>
+      <td><code>window</code></td>
+      <td><code>undefined</code></td>
+    </tr>
+    <tr>
+      <td>Executed</td>
+      <td>synchronously</td>
+      <td>asynchronously</td>
+    </tr>
+    <tr>
+      <td>Declarative imports (<code>import</code> statement)</td>
+      <td>no</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>Programmatic imports (Promise-based API)</td>
+      <td>yes</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>File extension</td>
+      <td><code>.js</code></td>
+      <td><code>.js</code></td>
+    </tr>
+  </tbody>
+
+</table>
