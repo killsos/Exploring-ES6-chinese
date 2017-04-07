@@ -27,7 +27,7 @@
   * 16.5.4. Configuring module loading
 * 16.6. Using ES6 modules in browsers
   * 16.6.1. Browsers: asynchronous modules versus synchronous scripts
-  * 16.7. Details: imports as views on exports
+* 16.7. Details: imports as views on exports
   * 16.7.1. In CommonJS, imports are copies of exported values
   * 16.7.2. In ES6, imports are live read-only views on exported values
   * 16.7.3. Implementing views
