@@ -144,4 +144,6 @@ For example, you may want to iterate over the elements of an Array, the key-valu
 
 It’s not practical for every consumer to support all sources, especially because it should be possible to create new sources (e.g. via libraries). Therefore, ES6 introduces the interface Iterable. Data consumers use it, data sources implement it:
 
-<img src="./iteration----consumers_sources.jpg" />
+
+
+<img src="./iteration----consumers_sources.jpg"  width="400"/>
