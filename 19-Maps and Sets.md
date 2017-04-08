@@ -667,10 +667,158 @@ Additionally, once a key is gone, its entry will also disappear (eventually, but
 加之,一旦一个属性消失了 这个属性所对用实体也就消失了 并且这个过程无法察觉到
 
 
-### 19.3.3 You can’t get an overview of a WeakMap or clear it 
+### 19.3.3 You can’t get an overview of a WeakMap or clear it
 
-It is impossible to inspect the innards of a WeakMap, to get an overview of them. That includes not being able to iterate over keys, values or entries. Put differently: to get content out of a WeakMap, you need a key. There is no way to clear a WeakMap, either (as a work-around, you can create a completely new instance).
+It is impossible to inspect the innards of a WeakMap, to get an overview of them.
 
-These restrictions enable a security property. Quoting Mark Miller: “The mapping from weakmap/key pair value can only be observed or affected by someone who has both the weakmap and the key. With clear(), someone with only the WeakMap would’ve been able to affect the WeakMap-and-key-to-value mapping.”
+不能查看到WeakMap内部 他们所有的内容
+
+That includes not being able to iterate over keys, values or entries. Put differently: to get content out of a WeakMap, you need a key.
+
+这也包括无法遍历keys, values , entries 换言之你可以通过key获得value
+
+There is no way to clear a WeakMap, either (as a work-around, you can create a completely new instance).
+
+无法清除WeakMap 作为一个变通方法可以创建一个新实例
+
+These restrictions enable a security property.
+
+这些限制使更安全
+
+Quoting Mark Miller: “The mapping from weakmap/key pair value can only be observed or affected by someone who has both the weakmap and the key.
+
+With clear(), someone with only the WeakMap would’ve been able to affect the WeakMap-and-key-to-value mapping.”
 
 Additionally, iteration would be difficult to implement, because you’d have to guarantee that keys remain weakly held.
+
+此外 迭代是很难实现 因为你不得不保证keys的脆弱
+
+### 19.3.4 Use cases for WeakMaps
+### WeakMaps使用场景
+
+WeakMaps are useful for associating data with objects whose life cycle you can’t (or don’t want to) control.
+
+ WeakMaps是非常有用的对于一个数据与对象结合,这个生命周期不受控制
+
+In this section, we look at two examples:
+
+1. Caching computed results
+
+缓存计算后结果
+
+2. Managing listeners
+
+管理监听事件
+
+3. Keeping private data
+
+保持私有数据
+
+### 19.3.4.1 Caching computed results via WeakMaps
+
+With WeakMaps, you can associate previously computed results with objects, without having to worry about memory management.
+
+The following function countOwnKeys is an example: it caches previous results in the WeakMap cache.
+
+        const cache = new WeakMap();
+
+        function countOwnKeys(obj) {
+            if (cache.has(obj)) {
+                console.log('Cached');
+                return cache.get(obj);
+            } else {
+                console.log('Computed');
+                const count = Object.keys(obj).length;
+                cache.set(obj, count);
+                return count;
+            }
+        }
+
+If we use this function with an object obj, you can see that the result is only computed for the first invocation, while a cached value is used for the second invocation:
+
+          > const obj = { foo: 1, bar: 2};
+          > countOwnKeys(obj)
+          Computed
+          2
+          > countOwnKeys(obj)
+          Cached
+          2
+
+### 19.3.4.2 Managing listeners
+
+Let’s say we want to attach listeners to objects without changing the objects. You’d be able to add listeners to an object obj:
+
+          const obj = {};
+          addListener(obj, () => console.log('hello'));
+          addListener(obj, () => console.log('world'));
+
+And you’d be able to trigger the listeners:
+
+          triggerListeners(obj);
+          // Output:
+          // hello
+          // world
+
+The two functions addListener() and triggerListeners() can be implemented as follows.
+
+          const _objToListeners = new WeakMap();
+
+          function addListener(obj, listener) {
+              if (! _objToListeners.has(obj)) {
+                  _objToListeners.set(obj, new Set());
+              }
+              _objToListeners.get(obj).add(listener);
+          }
+
+          function triggerListeners(obj) {
+              const listeners = _objToListeners.get(obj);
+              if (listeners) {
+                  for (const listener of listeners) {
+                      listener();
+                  }
+              }
+          }
+
+The advantage of using a WeakMap here is that, once an object is garbage-collected, its listeners will be garbage-collected, too. In other words: there won’t be any memory leaks.
+
+WeakMap不需要担心内存泄漏
+
+### 19.3.4.3 Keeping private data via WeakMaps
+
+In the following code, the WeakMaps _counter and _action are used to store the data of virtual properties of instances of Countdown:
+
+
+          const _counter = new WeakMap();
+          const _action = new WeakMap();
+
+          class Countdown {
+              constructor(counter, action) {
+                  _counter.set(this, counter);
+                  _action.set(this, action);
+              }
+              dec() {
+                  let counter = _counter.get(this);
+                  if (counter < 1) return;
+                  counter--;
+                  _counter.set(this, counter);
+                  if (counter === 0) {
+                      _action.get(this)();
+                  }
+              }
+          }
+
+More information on this technique is given in the chapter on classes.
+
+### 19.3.5 WeakMap API
+
+The constructor and the four methods of WeakMap work the same as their Map equivalents:
+
+1. new WeakMap(entries? : Iterable<[any,any]>)
+
+2. WeakMap.prototype.get(key) : any
+
+3. WeakMap.prototype.set(key, value) : this
+
+4. WeakMap.prototype.has(key) : boolean
+
+5. WeakMap.prototype.delete(key) : boolean
