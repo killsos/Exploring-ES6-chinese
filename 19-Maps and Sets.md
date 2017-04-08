@@ -822,3 +822,401 @@ The constructor and the four methods of WeakMap work the same as their Map equiv
 4. WeakMap.prototype.has(key) : boolean
 
 5. WeakMap.prototype.delete(key) : boolean
+
+### 19.4 Set
+
+ECMAScript 5 doesn’t have a Set data structure, either. There are two possible work-arounds:
+
+ECMAScript 5没有set 但是有连个变通方法:
+
+1. Use the keys of an object to store the elements of a set of strings.
+
+使用对象的键来存储一组字符串的元素。
+
+2. Store (arbitrary) set elements in an Array: Check whether it contains an element via indexOf(), remove elements via filter(), etc.
+
+在数组中存储（任意）集元素：通过indexOf（）包含元素，通过filter（）等删除元素。
+
+This is not a very fast solution, but it’s easy to implement. One issue to be aware of is that indexOf() can’t find the value NaN.
+
+这不是很快的方案 但是很容易实现 但是一个问题是indexOf不能正确处理NaN
+
+ECMAScript 6 has the data structure Set which works for arbitrary values, is fast and handles NaN correctly.
+
+ECMAScript 6的Set可以赋值任意值 速度快 并且能正确处理NaN
+
+### 19.4.1 Basic operations
+
+Managing single elements:
+
+          > const set = new Set();
+          > set.add('red')
+
+          > set.has('red')
+          true
+          > set.delete('red')
+          true
+          > set.has('red')
+          false
+
+Determining the size of a Set and clearing it:
+
+          > const set = new Set();
+          > set.add('red')
+          > set.add('green')
+
+          > set.size
+          2
+          > set.clear();
+          > set.size
+          0
+
+### 19.4.2 Setting up a Set
+
+You can set up a Set via an iterable over the elements that make up the Set. For example, via an Array:
+
+            const set = new Set(['red', 'green', 'blue']);
+            Alternatively, the add method is chainable:
+
+            const set = new Set().add('red').add('green').add('blue');
+
+### 19.4.2.1 Pitfall: new Set() has at most one argument
+### 易犯的错误 new Set() 最多一个参数
+
+The Set constructor has zero or one arguments:
+
+Zero arguments: an empty Set is created.
+
+零个参数是空set
+
+One argument: the argument needs to be iterable; the iterated items define the elements of the Set.
+
+一个参数 这个参数是可迭代
+
+Further arguments are ignored, which may lead to unexpected results:
+
+如果更多参数将被忽略
+
+          > Array.from(new Set(['foo', 'bar']))
+          [ 'foo', 'bar' ]
+          > Array.from(new Set('foo', 'bar'))
+          [ 'f', 'o' ]
+
+For the second Set, only 'foo' is used (which is iterable) to define the Set.
+
+### 19.4.3 Comparing Set elements
+
+As with Maps, elements are compared similarly to ===, with the exception of NaN being like any other value.
+
+对于映射元素比较类似=== 但是意外是NaN被等待其他值一样
+
+          > const set = new Set([NaN]);
+          > set.size
+          1
+          > set.has(NaN)
+          true
+
+Adding an element a second time has no effect:
+
+          > const set = new Set();
+
+          > set.add('foo');
+          > set.size
+          1
+
+          > set.add('foo');
+          > set.size
+          1
+
+Similarly to ===, two different objects are never considered equal (which can’t currently be customized, as explained later, in the FAQ, later):
+
+两个不同对象是不认为相等的 类似于===  比较对象的内存地址
+
+          > const set = new Set();
+
+          > set.add({});
+          > set.size
+          1
+
+          > set.add({});
+          > set.size
+          2
+
+### 19.4.4 Iterating
+
+Sets are iterable and the for-of loop works as you’d expect:
+
+Sets是可迭代的 通过for-of
+
+              const set = new Set(['red', 'green', 'blue']);
+              for (const x of set) {
+                  console.log(x);
+              }
+              // Output:
+              // red
+              // green
+              // blue
+
+As you can see, Sets preserve iteration order. That is, elements are always iterated over in the order in which they were inserted.
+
+Sets保持迭代顺序
+
+[The previously explained spread operator (...)](http://exploringjs.com/es6/ch_maps-sets.html#sec_spreading-maps) works with iterables and thus lets you convert a Set to an Array:
+
+可以通过扩展操作符将Sets转为数组
+
+          const set = new Set(['red', 'green', 'blue']);
+          const arr = [...set]; // ['red', 'green', 'blue']
+
+We now have a concise way to convert an Array to a Set and back, which has the effect of eliminating duplicates from the Array:
+
+          const arr = [3, 5, 2, 2, 5, 5];
+          const unique = [...new Set(arr)]; // [3, 5, 2]
+
+### 19.4.5 Mapping and filtering
+### 映射与过滤
+
+In contrast to Arrays, Sets don’t have the methods map() and filter(). A work-around is to convert them to Arrays and back.
+
+与数组相比 Sets没有map() and filter()方法 变通方法可以先将Sets转为数组
+
+Mapping:
+
+            const set = new Set([1, 2, 3]);
+            set = new Set([...set].map(x => x * 2));
+            // Resulting Set: {2, 4, 6}
+
+Filtering:
+
+            const set = new Set([1, 2, 3, 4, 5]);
+            set = new Set([...set].filter(x => (x % 2) == 0));
+            // Resulting Set: {2, 4}
+
+### 19.4.6 Union, intersection, difference
+
+ECMAScript 6 Sets have no methods for computing the union (e.g. addAll), intersection (e.g. retainAll) or difference (e.g. removeAll).
+
+ECMAScript 6集合没有求并集 交集 差集的方法
+
+This section explains how to work around that limitation.
+
+下面将解释如何解决这些限制的变通方法
+
+
+### 19.4.6.1 Union
+### 并集
+
+Union (a ∪ b): create a Set that contains the elements of both Set a and Set b.
+
+              const a = new Set([1,2,3]);
+              const b = new Set([4,3,2]);
+              const union = new Set([...a, ...b]);
+              // {1,2,3,4}
+
+The pattern is always the same:
+
+1. Convert one or both Sets to Arrays.
+2. Perform the operation.
+3. Convert the result back to a Set.
+
+The spread operator (...) inserts the elements of something iterable (such as a Set) into an Array. Therefore, [...a, ...b] means that a and b are converted to Arrays and concatenated. It is equivalent to [...a].concat([...b]).
+
+
+### 19.4.6.2 Intersection
+### 交集
+
+Intersection (a ∩ b): create a Set that contains those elements of Set a that are also in Set b.
+
+            const a = new Set([1,2,3]);
+            const b = new Set([4,3,2]);
+
+            const intersection = new Set([...a].filter(x => b.has(x)));
+            // {2,3}
+
+Steps: Convert a to an Array, filter the elements, convert the result to a Set.
+通过数组的filter方法和Sets.has()方法
+
+### 19.4.6.3 Difference
+### 差集
+
+Difference (a \ b): create a Set that contains those elements of Set a that are not in Set b. This operation is also sometimes called minus (-).
+
+            const a = new Set([1,2,3]);
+            const b = new Set([4,3,2]);[...a].filter(x => !b.has(x)));
+            // {1}
+
+
+### 19.4.7 Set API
+
+Constructor:
+
+            new Set(elements? : Iterable<any>)
+
+If you don’t provide the parameter iterable then an empty Set is created. If you do then the iterated values are added as elements to the Set.
+
+如果没有参数 就是空Sets 如果这时候参数是可迭代的值 值将被添加到Sets中
+
+For example:
+              const set = new Set(['red', 'green', 'blue']);
+
+**Single Set elements:*8
+
+1. Set.prototype.add(value) : this
+
+Adds value to this Set. This method returns this, which means that it can be chained.
+
+2. Set.prototype.has(value) : boolean
+
+Checks whether value is in this Set.
+
+3. Set.prototype.delete(value) : boolean
+
+Removes value from this Set.
+
+**All Set elements:**
+
+1. get Set.prototype.size : number
+
+Returns how many elements there are in this Set.
+
+2. Set.prototype.clear() : void
+
+Removes all elements from this Set.
+
+Iterating and looping:
+
+1. Set.prototype.values() : Iterable<any>
+
+Returns an iterable over all elements of this Set.
+
+2. Set.prototype[Symbol.iterator]() : Iterable<any>
+
+The default way of iterating over Sets. Points to Set.prototype.values.
+
+3. Set.prototype.forEach((value, key, collection) => void, thisArg?)
+
+Loops over the elements of this Set and invokes the callback (first parameter) for each one. value and key are both set to the element, so that this method works similarly to Map.prototype.forEach. If thisArg is provided, this is set to it for each call. Otherwise, this is set to undefined.
+
+Symmetry(整齐) with Map: The following two methods only exist so that the interface of Sets is similar to the interface of Maps. Each Set element is handled as if it were a Map entry whose key and value are the element.
+
+* Set.prototype.entries() : Iterable<[any,any]>
+
+
+entries() allows you to convert a Set to a Map:
+
+                const set = new Set(['a', 'b', 'c']);
+                const map = new Map(set.entries());
+                // Map { 'a' => 'a', 'b' => 'b', 'c' => 'c' }
+
+###19.5 WeakSet
+
+A WeakSet is a Set that doesn’t prevent its elements from being garbage-collected. Consult the section on WeakMap for an explanation of why WeakSets don’t allow iteration, looping and clearing.
+
+WeakSet是不阻止垃圾回收的set WeakSet是不支持迭代 循环 清除.
+
+### 19.5.1 Use cases for WeakSets
+### 使用WeakSets情景
+
+Given that you can’t iterate over their elements, there are not that many use cases for WeakSets. They do enable you to mark objects.
+
+Given that ....鉴于
+
+鉴于WeakSets不可以迭代 使用WeakSets的场景很少
+
+### 19.5.1.1 Marking objects created by a factory function
+### 通过工厂函数创建对象
+
+For example, if you have a factory function for proxies, you can use a WeakSet to record which objects were created by that factory:
+
+          const _proxies = new WeakSet();
+
+          function createProxy(obj) {
+              const proxy = ···;
+              _proxies.add(proxy);
+              return proxy;
+          }
+
+          function isProxy(obj) {
+              return _proxies.has(obj);
+          }
+
+The complete example is shown [in the chapter on proxies.](http://exploringjs.com/es6/ch_proxies.html#sec_detect-proxies)
+
+_proxies must be a WeakSet, because a normal Set would prevent a proxy from being garbage-collected once it isn’t referred to, anymore.
+
+### 19.5.1.2 Marking objects as safe to use with a method
+
+[Domenic Denicola ](https://mail.mozilla.org/pipermail/es-discuss/2015-June/043027.html)shows how a class Foo can ensure that its methods are only applied to instances that were created by it:
+
+          const foos = new WeakSet();
+
+          class Foo {
+              constructor() {
+                  foos.add(this);
+              }
+
+              method() {
+                  if (!foos.has(this)) {
+                      throw new TypeError('Incompatible object!');
+                  }
+              }
+          }
+
+
+### 19.5.2 WeakSet API
+
+The constructor and the three methods of WeakSet work the same as their Set equivalents:
+
+1. new WeakSet(elements? : Iterable<any>)
+
+2. WeakSet.prototype.add(value)
+
+3. WeakSet.prototype.has(value)
+
+4. WeakSet.prototype.delete(value)
+
+
+
+### 19.6 FAQ: Maps and Sets
+
+### 19.6.1 Why do Maps and Sets have the property size and not length?
+
+Arrays have the property length to count the number of entries. Maps and Sets have a different property, size.
+
+The reason for this difference is that length is for sequences, data structures that are indexable – like Arrays. size is for collections that are primarily unordered – like Maps and Sets.
+
+### 19.6.2 Why can’t I configure how Maps and Sets compare keys and values?
+
+It would be nice if there were a way to configure what Map keys and what Set elements are considered equal. But that feature has been postponed, as it is difficult to implement properly and efficiently.
+
+### 19.6.3 Is there a way to specify a default value when getting something out of a Map?
+
+If you use a key to get something out of a Map, you’d occasionally like to specify a default value that is returned if the key is not in the Map. ES6 Maps don’t let you do this directly. But you can use the Or operator (||), as demonstrated in the following code. countChars returns a Map that maps characters to numbers of occurrences.
+
+            function countChars(chars) {
+                const charCounts = new Map();
+                for (const ch of chars) {
+                    ch = ch.toLowerCase();
+                    const prevCount = charCounts.get(ch) || 0; // (A)
+                    charCounts.set(ch, prevCount+1);
+                }
+                return charCounts;
+            }
+
+In line A, the default 0 is used if ch is not in the charCounts and get() returns undefined.
+
+### 19.6.4 When should I use a Map, when an object?
+
+If you map anything other than strings to any kind of data, you have no choice: you must use a Map.
+
+If, however, you are mapping strings to arbitrary data, you must decide whether or not to use an object. A rough general guideline is:
+
+* Is there a fixed set of keys (known at development time)?
+Then use an object and access the values via fixed keys: obj.key
+
+* Can the set of keys change at runtime?
+Then use a Map and access the values via keys stored in variables: map.get(theKey)
+
+### 19.6.5 When would I use an object as a key in a Map?
+
+Map keys mainly make sense if they are compared by value (the same “content” means that two values are considered equal, not the same identity). That excludes objects. There is one use case – externally attaching data to objects, but that use case is better served by WeakMaps where an entry goes away when the key disappears.
