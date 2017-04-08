@@ -427,9 +427,250 @@ Let’s combine the following two Maps:
 
 To combine map1 and map2, I turn them into Arrays via the spread operator (...) and concatenate those Arrays. Afterwards, I convert the result back to a Map. All of that is done in the first line.
 
+想将Map通过扩展操作符转为数组 然后将数组生成合并 然后将合并后的数组再转为Map 但是存在一个问题如果属性名相同 后面值覆盖前值
+
           > const combinedMap = new Map([...map1, ...map2])
           > [...combinedMap] // convert to Array to display
           [ [ 1, 'a1' ],
             [ 2, 'b2' ],
             [ 3, 'c2' ],
             [ 4, 'd2' ] ]
+
+
+### 19.2.8 Arbitrary Maps as JSON via Arrays of pairs
+### 任意Map作为JSON通过数组对
+
+If a Map contains arbitrary (JSON-compatible) data, we can convert it to JSON by encoding it as an Array of key-value pairs (2-element Arrays). Let’s examine first how to achieve that encoding.
+
+Map可以包含任意数据包括json 我们可以转换JSON通过数组键值对的编码方式
+
+
+### 19.2.8.1 Converting Maps to and from Arrays of pairs
+### Maps转为数组键值对
+
+The spread operator lets you convert a Map to an Array of pairs:
+通过扩展操作符转Maps为数组对
+
+            > const myMap = new Map().set(true, 7).set({foo: 3}, ['abc']);
+            > [...myMap]
+            [ [ true, 7 ], [ { foo: 3 }, [ 'abc' ] ] ]
+
+The Map constructor lets you convert an Array of pairs to a Map:
+
+            > new Map([[true, 7], [{foo: 3}, ['abc']]])
+            Map {true => 7, Object {foo: 3} => ['abc']}
+
+### 19.2.8.2 The conversion to and from JSON
+### JSON转换
+
+Let’s use this knowledge to convert any Map with JSON-compatible data to JSON and back:
+
+            function mapToJson(map) {
+                return JSON.stringify([...map]);
+            }
+
+**通过JSON.stringify([...map])方法**
+
+
+            function jsonToMap(jsonStr) {
+                return new Map(JSON.parse(jsonStr));
+            }
+
+**new Map(JSON.parse(jsonStr))**
+
+The following interaction demonstrates how these functions are used:
+
+            > const myMap = new Map().set(true, 7).set({foo: 3}, ['abc']);
+
+            > mapToJson(myMap)
+            '[[true,7],[{"foo":3},["abc"]]]'
+
+            > jsonToMap('[[true,7],[{"foo":3},["abc"]]]')
+            Map {true => 7, Object {foo: 3} => ['abc']}
+
+
+### 19.2.9 String Maps as JSON via objects
+
+Whenever a Map only has strings as keys, you can convert it to JSON by encoding it as an object. Let’s examine first how to achieve that encoding.
+
+### 19.2.9.1 Converting a string Map to and from an object
+
+The following two function convert string Maps to and from objects:
+
+                function strMapToObj(strMap) {
+                    const obj = Object.create(null);
+                    for (const [k,v] of strMap) {
+                        // We don’t escape the key '__proto__'
+                        // which can cause problems on older engines
+                        obj[k] = v;
+                    }
+                    return obj;
+                }
+
+                function objToStrMap(obj) {
+                    const strMap = new Map();
+                    for (const k of Object.keys(obj)) {
+                        strMap.set(k, obj[k]);
+                    }
+                    return strMap;
+                }
+
+Let’s use these two functions:
+
+                > const myMap = new Map().set('yes', true).set('no', false);
+
+                > strMapToObj(myMap)
+                { yes: true, no: false }
+
+                > objToStrMap({yes: true, no: false})
+                [ [ 'yes', true ], [ 'no', false ] ]
+
+
+### 19.2.9.2 The conversion to and from JSON
+
+With these helper functions, the conversion to JSON works as follows:
+
+                function strMapToJson(strMap) {
+                    return JSON.stringify(strMapToObj(strMap));
+                }
+
+                function jsonToStrMap(jsonStr) {
+                    return objToStrMap(JSON.parse(jsonStr));
+                }
+
+This is an example of using these functions:
+
+                > const myMap = new Map().set('yes', true).set('no', false);
+
+                > strMapToJson(myMap)
+                '{"yes":true,"no":false}'
+
+                > jsonToStrMap('{"yes":true,"no":false}');
+                Map {'yes' => true, 'no' => false}
+
+### 19.2.10 Map API
+
+Constructor:
+
+        new Map(entries? : Iterable<[any,any]>)
+
+If you don’t provide the parameter iterable then an empty Map is created.
+
+If you do provide an iterable over [key, value] pairs then those pairs are used to add entries to the Map.
+
+For example:
+                  const map = new Map([
+                      [ 1, 'one' ],
+                      [ 2, 'two' ],
+                      [ 3, 'three' ], // trailing comma is ignored
+                  ]);
+
+**Handling single entries:**
+
+1. Map.prototype.get(key) : any
+
+Returns the value that key is mapped to in this Map. If there is no key key in this Map, undefined is returned.
+
+2. Map.prototype.set(key, value) : this
+
+Maps the given key to the given value. If there is already an entry whose key is key, it is updated. Otherwise, a new entry is created. This method returns this, which means that you can chain it.
+
+3. Map.prototype.has(key) : boolean
+
+Returns whether the given key exists in this Map.
+
+4. Map.prototype.delete(key) : boolean
+
+If there is an entry whose key is key, it is removed and true is returned. Otherwise, nothing happens and false is returned.
+
+**Handling all entries:**
+
+1. get Map.prototype.size : number
+
+Returns how many entries there are in this Map.
+
+2. Map.prototype.clear() : void
+
+Removes all entries from this Map.
+
+
+**Iterating and looping:** happens in the order in which entries were added to a Map.
+
+1. Map.prototype.entries() : Iterable<[any,any]>
+
+Returns an iterable with one [key,value] pair for each entry in this Map. The pairs are Arrays of length 2.
+
+2. Map.prototype.forEach((value, key, collection) => void, thisArg?) : void
+
+The first parameter is a callback that is invoked once for each entry in this Map. If thisArg is provided, this is set to it for each invocation. Otherwise, this is set to undefined.
+
+3. Map.prototype.keys() : Iterable<any>
+
+Returns an iterable over all keys in this Map.
+
+4. Map.prototype.values() : Iterable<any>
+
+Returns an iterable over all values in this Map.
+
+5. Map.prototype[Symbol.iterator]() : Iterable<[any,any]>
+
+The default way of iterating over Maps. Refers to Map.prototype.entries.
+
+### 19.3 WeakMap
+
+WeakMaps work mostly like Maps, with the following differences:
+
+WeakMaps与Maps的区别:
+
+1. WeakMap keys are objects (values can be arbitrary values)
+
+WeakMap属性名是对象 但是属性值可以是任意值
+
+2. WeakMap keys are weakly held
+
+eakMap属性名是很脆弱存在
+
+3. You can’t get an overview of the contents of a WeakMap
+
+你不可以看到WeakMap的数据
+
+4. You can’t clear a WeakMap
+
+你不可以清除WeakMap
+
+The following sections explain each of these differences.
+
+### 19.3.1 WeakMap keys are objects
+### WeakMap的属性名必须是对象 否则报出TypeError
+
+If you add an entry to a WeakMap then the key must be an object:
+
+          const wm = new WeakMap()
+
+          wm.set('abc', 123); // TypeError
+          wm.set({}, 123); // OK
+
+### 19.3.2 WeakMap keys are weakly held
+
+The keys in a WeakMap are weakly held: Normally, an object that isn’t referred to by any storage location (variable, property, etc.) can be garbage-collected.
+
+WeakMap的属性名是脆弱的保持 通常 如果一个对象被设置为null 这个对象可以被垃圾回收
+
+etc 等等及其他; 诸如此类
+
+WeakMap keys do not count as storage locations in that sense. In other words: an object being a key in a WeakMap does not prevent the object being garbage-collected.
+
+WeakMapd的属性名在一定意义上作为内存地址不考虑 换言之 一个对象作为key在WeakMap不能阻止这个对象被回收
+
+Additionally, once a key is gone, its entry will also disappear (eventually, but there is no way to detect when, anyway).
+
+加之,一旦一个属性消失了 这个属性所对用实体也就消失了 并且这个过程无法察觉到
+
+
+### 19.3.3 You can’t get an overview of a WeakMap or clear it 
+
+It is impossible to inspect the innards of a WeakMap, to get an overview of them. That includes not being able to iterate over keys, values or entries. Put differently: to get content out of a WeakMap, you need a key. There is no way to clear a WeakMap, either (as a work-around, you can create a completely new instance).
+
+These restrictions enable a security property. Quoting Mark Miller: “The mapping from weakmap/key pair value can only be observed or affected by someone who has both the weakmap and the key. With clear(), someone with only the WeakMap would’ve been able to affect the WeakMap-and-key-to-value mapping.”
+
+Additionally, iteration would be difficult to implement, because you’d have to guarantee that keys remain weakly held.
