@@ -351,15 +351,85 @@ The Map method forEach has the following signature:
 
 Map.prototype.forEach((value, key, map) => void, thisArg?) : void
 
+Map的forEach((value, key, map) => void, thisArg?) : void
+
 The signature of the first parameter mirrors the signature of the callback of Array.prototype.forEach, which is why the value comes first.
 
               const map = new Map([
                   [false, 'no'],
                   [true,  'yes'],
               ]);
+
               map.forEach((value, key) => {
                   console.log(key, value);
               });
               // Output:
               // false no
               // true yes
+
+i.e 换言之 即
+
+### 19.2.6 Mapping and filtering Maps
+
+You can map() and filter() Arrays, but there are no such operations for Maps. The solution is:
+
+Maps没有map()和 filter()方法
+
+1.Convert the Map into an Array of [key,value] pairs.
+
+2. Map or filter the Array.
+
+3. Convert the result back to a Map.
+
+I’ll use the following Map to demonstrate how that works.
+
+          const originalMap = new Map()
+          .set(1, 'a')
+          .set(2, 'b')
+          .set(3, 'c');
+
+Mapping originalMap:
+
+          const mappedMap = new Map( // step 3
+              [...originalMap] // step 1
+              .map(([k, v]) => [k * 2, '_' + v]) // step 2
+          );
+          // Resulting Map: {2 => '_a', 4 => '_b', 6 => '_c'}
+
+Filtering originalMap:
+
+          const filteredMap = new Map( // step 3
+              [...originalMap] // step 1
+              .filter(([k, v]) => k < 3) // step 2
+          );
+          // Resulting Map: {1 => 'a', 2 => 'b'}
+
+Step 1 is performed by the spread operator (...) which I have explained previously.
+
+虽然Map没有map filter方法 不过过度方法 先将Map通过扩展操作符转为数组
+
+### 19.2.7 Combining Maps
+### 合并Map
+
+There are no methods for combining Maps, which is why the approach from the previous section must be used to do so.
+
+Let’s combine the following two Maps:
+
+          const map1 = new Map()
+          .set(1, 'a1')
+          .set(2, 'b1')
+          .set(3, 'c1');
+
+          const map2 = new Map()
+          .set(2, 'b2')
+          .set(3, 'c2')
+          .set(4, 'd2');
+
+To combine map1 and map2, I turn them into Arrays via the spread operator (...) and concatenate those Arrays. Afterwards, I convert the result back to a Map. All of that is done in the first line.
+
+          > const combinedMap = new Map([...map1, ...map2])
+          > [...combinedMap] // convert to Array to display
+          [ [ 1, 'a1' ],
+            [ 2, 'b2' ],
+            [ 3, 'c2' ],
+            [ 4, 'd2' ] ]
