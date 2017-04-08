@@ -121,3 +121,27 @@ Language constructs that access data via iteration:
 * yield*:
 
         yield* anIterable;
+
+
+### 21.2 Iterability
+### 可迭代性
+
+The idea of iterability is as follows.
+
+* Data consumers:
+
+JavaScript has language constructs that consume data.
+
+For example, for-of loops over values and the spread operator (...) inserts values into Arrays or function calls.
+
+for-of spread operator (...)
+
+* Data sources:
+
+The data consumers could get their values from a variety of sources.
+
+For example, you may want to iterate over the elements of an Array, the key-value entries in a Map or the characters of a string.
+
+It’s not practical for every consumer to support all sources, especially because it should be possible to create new sources (e.g. via libraries). Therefore, ES6 introduces the interface Iterable. Data consumers use it, data sources implement it:
+
+<img src="./iteration----consumers_sources.jpg" />
