@@ -40,3 +40,84 @@
   * 21.8.3. Checklist
 
 ---
+
+### 21.1 Overview
+
+ES6 introduces a new mechanism for traversing data: iteration.
+
+ES6有新迭代数据机制
+
+Two concepts are central to iteration:
+
+有两个观点是迭代的核心
+
+* An iterable is a data structure that wants to make its elements accessible to the public. It does so by implementing a method whose key is Symbol.iterator. That method is a factory for iterators.
+
+对象如果有Symbol.iterator属性是可迭代
+
+* An iterator is a pointer for traversing the elements of a data structure (think cursors in databases).
+
+可迭代是游标对于数据结构遍历元素
+
+Expressed as interfaces in TypeScript notation, these roles look like this:
+
+          interface Iterable {
+              [Symbol.iterator]() : Iterator;
+          }
+          interface Iterator {
+              next() : IteratorResult;
+          }
+          interface IteratorResult {
+              value: any;
+              done: boolean;
+          }
+
+
+### 21.1.1 Iterable values
+
+The following values are iterable:
+
+1. Arrays
+2. Strings
+3. Maps
+4. Sets
+5. DOM data structures (work in progress)
+
+Plain objects are not iterable (why is explained in [a dedicated section](http://exploringjs.com/es6/ch_iteration.html#sec_plain-objects-not-iterable)).
+
+### 21.1.2 Constructs supporting iteration
+
+Language constructs that access data via iteration:
+
+
+* Destructuring via an Array pattern:
+
+        const [a,b] = new Set(['a', 'b', 'c']);
+
+* for-of loop:
+
+        for (const x of ['a', 'b', 'c']) {
+            console.log(x);
+        }
+
+* Array.from():
+
+        const arr = Array.from(new Set(['a', 'b', 'c']));
+
+* Spread operator (...):
+
+        const arr = [...new Set(['a', 'b', 'c'])];
+
+* Constructors of Maps and Sets:
+
+        const map = new Map([[false, 'no'], [true, 'yes']]);
+        const set = new Set(['a', 'b', 'c']);
+
+* Promise.all(), Promise.race():
+
+        Promise.all(iterableOverPromises).then(···);
+        Promise.race(iterableOverPromises).then(···);
+
+* yield*:
+
+        yield* anIterable;
