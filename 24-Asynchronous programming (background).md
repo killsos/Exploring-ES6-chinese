@@ -343,7 +343,7 @@ Callbacks in Node.js style have three disadvantages (compared to those in a func
 * Reusing error handlers is harder.
 * Providing a default error handler is also harder. A default error handler is useful if you make a function call and don’t want to write your own handler. It could also be used by a function if a caller doesn’t specify a handler.
 
-24.4 Looking ahead
+### 24.4 Looking ahead
 
 The next chapter covers Promises and the ES6 Promise API. Promises are more complicated under the hood than callbacks. In exchange, they bring several significant advantages and eliminate most of the aforementioned cons of callbacks.
 
